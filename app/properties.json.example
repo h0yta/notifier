@@ -1,0 +1,4 @@
+{
+  "apiKey": "__api-key__",
+  "adlibrisUrl": "http://www.adlibris.com/se/sok?q=#####&sort_by=published&order_by=desc&filter=format_sv:inbunden&filter=grouped_language_sv:svenska"
+}
