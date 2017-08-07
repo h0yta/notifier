@@ -57,5 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
-# Ignore json as in settingfiles
-*.json
+# Ignore property files used
+/app/books.json
+/app/properties.json

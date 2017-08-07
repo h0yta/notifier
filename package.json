@@ -1,0 +1,30 @@
+{
+  "name": "bookFinder",
+  "version": "0.0.1",
+  "description": "Hitta din bok!",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./app/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hoyta/bookFinder.git"
+  },
+  "keywords": [
+    "books"
+  ],
+  "author": "hoyta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hoyta/bookFinder/issues"
+  },
+  "homepage": "https://github.com/hoyta/bookFinder#readme",
+  "dependencies": {
+    "slack-node": "0.1.8",
+    "cheerio": "^0.22.0",
+    "promise": "^7.1.1",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+  }
+}
