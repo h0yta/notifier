@@ -17,7 +17,7 @@ var init = function() {
 
 var getPropertiesFile = function() {
   return new Promise(function(res, rej) {
-    fs.readFile('./app/properties.json', 'utf8', function(err, data) {
+    fs.readFile(__dirname+'/properties.json', 'utf8', function(err, data) {
       res(data);
     });
   });
@@ -39,7 +39,7 @@ var getBooks = function() {
           console.log("Inga nyheter för " + book.author);
         }
         
-        fs.writeFile('./app/books.json', JSON.stringify(books));
+        fs.writeFile(__dirname+'/books.json', JSON.stringify(books));
       });
     });
   });
@@ -47,7 +47,7 @@ var getBooks = function() {
 
 var getBooksFile = function() {
   return new Promise(function(res, rej) {
-    fs.readFile('./app/books.json', 'utf8', function(err, data) {
+    fs.readFile(__dirname + '/books.json', 'utf8', function(err, data) {
       res(data);
     });
   });
