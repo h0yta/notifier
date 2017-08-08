@@ -30,13 +30,13 @@ var getBooks = function() {
       getLatestBook(book).then(function(latestBook) {
         if (book.latestBook === null || book.latestBook === undefined || book.latestBook === '') {
           book.latestBook = latestBook;
-          console.log("Saknar bok för " + book.author + " sparar senaste -> " + latestBook);
+          console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook);
         } else if (book.latestBook !== latestBook) {
           book.latestBook = latestBook;
           sendSlackNotification(book.author, latestBook);
-          console.log("Ny bok av " + book.author + " -> " + latestBook);
+          console.log(" Ny bok av " + book.author + " -> " + latestBook);
         } else {
-          console.log("Inga nyheter för " + book.author);
+          console.log(" Inga nyheter för " + book.author);
         }
         
         fs.writeFile(__dirname+'/books.json', JSON.stringify(books));
@@ -58,7 +58,7 @@ var getLatestBook = function(book) {
     var url = properties.adlibrisUrl.replace("#####", book.author);
     request(url, function (err, response, body) {
       if (err) {
-        console.err("Something went wrong, couldn't parse parseBookInfo.")
+        console.err(" Something went wrong, couldn't parse parseBookInfo.")
       } else {
         var $ = cheerio.load(body);
         var books = [];
