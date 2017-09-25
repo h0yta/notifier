@@ -21,9 +21,10 @@
   "homepage": "https://github.com/hoyta/bookFinder#readme",
   "dependencies": {
     "slack-node": "0.1.8",
-    "cheerio": "^0.22.0",
-    "promise": "^7.1.1",
-    "request": "^2.79.0"
+    "cheerio": "0.22.0",
+    "promise": "7.1.1",
+    "request": "2.79.0",
+    "dateformat": "3.0.2"
   },
   "devDependencies": {
   }

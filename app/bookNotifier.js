@@ -1,7 +1,7 @@
 var request = require('request');
 var cheerio = require('cheerio');
 var Promise = require('promise');
-var Slack = require('slack-node');
+var slack = require('./slack.js');
 var fs = require('fs');
 
 var runBookNotifier = function() {
@@ -35,8 +35,8 @@ var getBooks = function() {
             console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook);
           } else if (book.latestBook !== latestBook) {
             book.latestBook = latestBook;
-            sendSlackNotification(book.author, latestBook);
-            console.log(" Ny bok av " + book.author + " -> " + latestBook);
+            slack.send('Boktips - ny bok av ' + book.author + ' -> ' + latestBook);
+            console.log(" Boktips - ny bok av " + book.author + " -> " + latestBook);
           } else {
             console.log(" Inga nyheter för " + book.author);
           }
@@ -74,17 +74,6 @@ var getLatestBook = function(book) {
         resolve(books[0]);
       }
     });
-  });
-}
-
-var sendSlackNotification = function(author, book) {
-  var Slack = require('slack-node');
-  slack = new Slack(properties.apiToken);
-  slack.api('chat.postMessage', {
-    text:'Ny bok av ' + author + ' -> ' + book,
-    channel:'#notifications'
-  }, function(err, response){
-    // IGNORE
   });
 }
 

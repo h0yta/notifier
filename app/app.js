@@ -2,6 +2,8 @@
 var fs = require('fs');
 
 var bookNotifier = require('./bookNotifier.js');
+var movieNotifier = require('./movieNotifier.js');
+var dateFormat = require('dateformat');
 
 var books;
 var properties;
@@ -18,6 +20,11 @@ var runNotifier = function(notifierName) {
     switch(notifierName) {
       case 'book':
         bookNotifier.run().then(() => {
+          res();
+        });
+      break;
+      case 'movie':
+        movieNotifier.run().then(() => {
           res();
         });
       break;
