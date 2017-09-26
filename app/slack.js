@@ -11,6 +11,14 @@ var sendNotification = function(message) {
   });
 }
 
+var getPropertiesFile = function() {
+  return new Promise(function(res, rej) {
+    fs.readFile(__dirname+'/properties.json', 'utf8', function(err, data) {
+      res(data);
+    });
+  });
+}
+
 var sendSlackNotification = function(apiToken, message) {
   var Slack = require('slack-node');
   slack = new Slack(apiToken);
