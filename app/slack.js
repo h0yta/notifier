@@ -26,7 +26,9 @@ var sendSlackNotification = function(apiToken, message) {
     text:message,
     channel:'#notifications'
   }, function(err, response){
-    // IGNORE
+    if (err) {
+      console.log('Error sending slack message: ' + response);
+    }
   });
 }
 
