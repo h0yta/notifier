@@ -37,7 +37,7 @@ var getRating = function(imdbUrl) {
     
     request(options, function(error, response, html){
       if (error) {
-        console.err(" Something went wrong, couldn't parse iMDB.");
+        console.err(" Something went wrong, couldn't parse iMDB.", response);
       } else {
         var $ = cheerio.load(html);
         resolve($('div.ratingValue').text().trim().split('/')[0]);
@@ -57,7 +57,7 @@ var getIMDBUrl = function(movieName) {
     
     request(options, function(error, response, html){
       if (error) {
-        console.err(" Something went wrong, couldn't parse iMDB.");
+        console.err(" Something went wrong, couldn't parse iMDB.", response);
       } else {
         var $ = cheerio.load(html);
         let results = [];

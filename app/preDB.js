@@ -28,7 +28,7 @@ var getMoviesFromPreDB = function() {
     var url = properties.predbUrl;
     request(options, function (err, response, body) {
       if (err) {
-        console.err(" Something went wrong, couldn't parse preDB.");
+        console.err(" Something went wrong, couldn't parse preDB.", response);
       } else {
         var $ = cheerio.load(body);
         var movies = [];
