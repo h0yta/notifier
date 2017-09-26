@@ -33,14 +33,12 @@ var getMovies = function() {
   return new Promise(function(res, rej) {
     predb.movies().then((movieList) => {
       movieList.forEach((movie) => {
-        imdb.rating(movie).then(function(rating) {            
+        imdb.rating(stripReleaseInfo(movie)).then(function(rating) {            
           if (parseFloat(rating) > 7.0) {
-            slack.send('Filmtips - \'' + movie + '\' med iMDB betyg ' + rating);
-            console.log('Filmtips - \'' + movie + '\' med iMDB betyg ' + rating);
+            slack.send('Filmtips - \'' + stripReleaseInfo(movie) + '\' med iMDB betyg ' + rating);
+            console.log('Filmtips - \'' + stripReleaseInfo(movie) + '\' med iMDB betyg ' + rating);
             // movie;SFV;oscar@vettig.se;Movie name
-            fs.appendFile(properties.requestFile, 'movie;SFV;oscar@vettig.se;' + movie + '\n');
-          } else {
-            //console.log('Skipping movie: ' + movie + ' with rating ' + rating)
+            fs.appendFile(properties.requestFile, 'MOVIE;' + movie + '\n');
           }
           
           res();
@@ -48,6 +46,13 @@ var getMovies = function() {
       });
     });
   });
+}
+
+var stripReleaseInfo = function(preName) {
+  var myRegexp = /(.\d{4}.)/;
+  var match = myRegexp.exec(preName);
+  let movieName = preName.substring(0, match['index']).replace(new RegExp('\\.', 'g'), ' ');
+  return movieName;
 }
 
 exports.run = runMovieNotifier;

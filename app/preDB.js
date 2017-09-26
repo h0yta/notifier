@@ -42,10 +42,11 @@ var getMoviesFromPreDB = function() {
             && $(this).find('a.p-title').text().indexOf('720p') > -1
             && $(this).find('a.p-title').text().indexOf('DIRFIX') < 0
             && $(this).find('a.p-title').text().indexOf('SUBBED') < 0
+            && $(this).find('a.p-title').text().indexOf('DOCU') < 0
             && $(this).find('span.p-time').attr('title').indexOf(yesterday) > -1;
         }).each(function(i, elem) {          
           var movie = $(this).find('a.p-title').text().trim();
-          movies.push(stripReleaseInfo(movie));
+          movies.push(movie);
         });
 
         resolve(movies);
@@ -60,13 +61,6 @@ var getPropertiesFile = function() {
       res(data);
     });
   });
-}
-
-var stripReleaseInfo = function(preName) {
-  var myRegexp = /(.\d{4}.)/;
-  var match = myRegexp.exec(preName);
-  let movieName = preName.substring(0, match['index']).replace(new RegExp('\\.', 'g'), ' ');
-  return movieName;
 }
 
 exports.movies = preDbMovies;
