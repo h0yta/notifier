@@ -32,7 +32,9 @@ var getMoviesFromPreDB = function() {
       } else {
         var $ = cheerio.load(body);
         var movies = [];
-        
+        movies.push('Baby.Driver.2017.BluRay.x264-0ST0');
+        resolve(movies);
+        return;
         let date = new Date();
         date.setDate(date.getDate() - 1);
         let yesterday = dateFormat(date, 'isoDate');

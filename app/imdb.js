@@ -1,32 +1,10 @@
 var request = require('request');
 var cheerio = require('cheerio');
 var Promise = require('promise');
-var fs = require('fs');
 
-var properties;
+var IMDB_SEARCH_URL = 'http://www.imdb.com/find?ref_=nv_sr_fn&q=####&s=all';
 
-var imdbRating = function(movieName) {
-  return new Promise(function(resolve, reject) {
-    getPropertiesFile().then((property) => {
-      properties = JSON.parse(property);
-      getIMDBUrl(movieName).then(function(imdbUrl) {
-        getRating(imdbUrl).then(function(rating) {
-          resolve(rating);
-        });
-      });
-    });
-  });
-}
-
-var getPropertiesFile = function() {
-  return new Promise(function(res, rej) {
-    fs.readFile(__dirname+'/properties.json', 'utf8', function(err, data) {
-      res(data);
-    });
-  });
-}
-
-var getRating = function(imdbUrl) {
+var getRatingFromUrl = function(imdbUrl) {
   return new Promise(function(resolve, reject) {
     var options = {
       url : imdbUrl,
@@ -49,7 +27,7 @@ var getRating = function(imdbUrl) {
 var getIMDBUrl = function(movieName) {
   return new Promise(function(resolve, reject) {
     var options = {
-      url : properties.imdbSearchUrl.replace("####", movieName),
+      url : IMDB_SEARCH_URL.replace("####", movieName),
       headers:  {
           'User-Agent' : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36'
       }
@@ -72,4 +50,5 @@ var getIMDBUrl = function(movieName) {
   });
 }
 
-exports.rating = imdbRating;
+exports.ratingFromUrl = getRatingFromUrl;
+exports.urlFromName = getIMDBUrl;

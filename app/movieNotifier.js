@@ -33,22 +33,36 @@ var getMovies = function() {
   return new Promise(function(res, rej) {
     predb.movies().then((movieList) => {
       movieList.forEach((movie) => {
-        imdb.rating(stripReleaseInfo(movie)).then(function(rating) {            
-          if (parseFloat(rating) > 7.0) {
-            slack.send('Filmtips - \'' + stripReleaseInfo(movie) + '\' med iMDB betyg ' + rating);
-            console.log('Filmtips - \'' + stripReleaseInfo(movie) + '\' med iMDB betyg ' + rating);
-            // movie;SFV;oscar@vettig.se;Movie name
-            fs.appendFile(properties.requestFile, 'MOVIE;' + movie + '\n');
-          }
-          
-          res();
+        imdb.urlFromName(stripReleaseInfoIncludeYear(movie)).then(function(url) {            
+          imdb.ratingFromUrl(url).then(function(rating) {            
+            if (parseFloat(rating) > 7.0) {
+              slack.send('Filmtips: *' + stripReleaseInfoExcludeYear(movie) + '* med iMDB betyg: *' + rating + '*\n' + url);
+              console.log('Filmtips: ' + stripReleaseInfoExcludeYear(movie) + ' med iMDB betyg ' + rating);
+              // movie;SFV;oscar@vettig.se;Movie name
+              fs.appendFile(properties.requestFile, 'MOVIE;' + movie + '\n');
+            }
+            res();
+          }, function(err) {
+            console.log('iMDB rating error', err);
+          });
+        }, function(err) {
+          console.log('iMDB URL error', err);
         });
       });
+    }, function(err) {
+      console.log('PreDB movie error', err);
     });
   });
 }
 
-var stripReleaseInfo = function(preName) {
+var stripReleaseInfoIncludeYear = function(preName) {
+  var myRegexp = /(.\d{4}.)/;
+  var match = myRegexp.exec(preName);
+  let movieName = preName.substring(0, match['index'] + 5).replace(new RegExp('\\.', 'g'), ' ');
+  return movieName;
+}
+
+var stripReleaseInfoExcludeYear = function(preName) {
   var myRegexp = /(.\d{4}.)/;
   var match = myRegexp.exec(preName);
   let movieName = preName.substring(0, match['index']).replace(new RegExp('\\.', 'g'), ' ');
