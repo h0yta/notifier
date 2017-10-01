@@ -6,6 +6,9 @@ var fs = require('fs');
 
 var properties;
 
+var required = ['BluRay', '720p'];
+var ignored = ['DIRFIX', 'SUBBED', 'DUBBED', 'DOCU', '.RU.'];
+
 var preDbMovies = function() {
   return new Promise(function(resolve, reject) {
     getPropertiesFile().then((property) => {
@@ -31,18 +34,25 @@ var getMoviesFromPreDB = function() {
         console.err(" Something went wrong, couldn't parse preDB.", response);
       } else {
         var $ = cheerio.load(body);
-        var movies = [];
+        var movies = [];     
         let date = new Date();
         date.setDate(date.getDate() - 1);
         let yesterday = dateFormat(date, 'isoDate');
 
         $('div.post').filter(function(i, elem) {
-          return $(this).find('a.p-title').text().indexOf('BluRay') > -1
-            && $(this).find('a.p-title').text().indexOf('720p') > -1
-            && $(this).find('a.p-title').text().indexOf('DIRFIX') < 0
-            && $(this).find('a.p-title').text().indexOf('SUBBED') < 0
-            && $(this).find('a.p-title').text().indexOf('DOCU') < 0
-            && $(this).find('span.p-time').attr('title').indexOf(yesterday) > -1;
+          let movie = $(this).find('a.p-title').text();
+
+          let requiredOK = required.filter(function(require){
+            return movie.indexOf(require) > -1;
+          });
+           
+          let ignoredOK = ignored.filter(function(ignore){
+            return movie.indexOf(ignore) > -1;
+          });
+
+          return $(this).find('span.p-time').attr('title').indexOf(yesterday) > -1
+          && requiredOK.length === required.length
+          && ignoredOK.length === 0;
         }).each(function(i, elem) {          
           var movie = $(this).find('a.p-title').text().trim();
           movies.push(movie);

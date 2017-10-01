@@ -8,9 +8,10 @@ var slack = require('./slack.js');
 var predb = require('./preDB.js');
 
 var properties;
+var lastYear = new Date().getFullYear() - 1;
 
 var runMovieNotifier = function() {
-  console.log("Startar film notifieraren...");
+  console.log("Startar film notifieraren... ");
   return new Promise(function(res, rej) {
     getPropertiesFile().then((property) => {
       properties = JSON.parse(property);
@@ -33,20 +34,16 @@ var getMovies = function() {
   return new Promise(function(res, rej) {
     predb.movies().then((movieList) => {
       movieList.forEach((movie) => {
-        imdb.urlFromName(stripReleaseInfoIncludeYear(movie)).then(function(url) {            
-          imdb.ratingFromUrl(url).then(function(rating) {            
-            if (parseFloat(rating) > 7.0) {
-              slack.send('Filmtips: *' + stripReleaseInfoExcludeYear(movie) + '* med iMDB betyg: *' + rating + '*\n' + url);
-              console.log('Filmtips: ' + stripReleaseInfoExcludeYear(movie) + ' med iMDB betyg ' + rating);
-              // movie;SFV;oscar@vettig.se;Movie name
-              fs.appendFile(properties.requestFile, 'MOVIE;' + movie + '\n');
-            }
-            res();
-          }, function(err) {
-            console.log('iMDB rating error', err);
-          });
+        imdb.movieInfo(stripReleaseInfo(movie)).then(function(imdbMovie) {
+          if (parseFloat(imdbMovie.rating) > 7.0 && parseInt(imdbMovie.year) >= lastYear) {
+            slack.send('Filmtips: *' + imdbMovie.name + '* med iMDB betyg: *' + imdbMovie.rating + '*\n' + imdbMovie.url);
+            console.log(' Filmtips: ' + imdbMovie.name + ' med iMDB betyg ' + imdbMovie.rating);
+            // MOVIE;SFV;oscar@vettig.se;Movie name
+            fs.appendFile(properties.requestFile, 'MOVIE;' + imdbMovie + '\n');
+          }
+          res();
         }, function(err) {
-          console.log('iMDB URL error', err);
+          console.log('iMDB rating error', err);
         });
       });
     }, function(err) {
@@ -55,17 +52,10 @@ var getMovies = function() {
   });
 }
 
-var stripReleaseInfoIncludeYear = function(preName) {
+var stripReleaseInfo = function(preName) {
   var myRegexp = /(.\d{4}.)/;
   var match = myRegexp.exec(preName);
   let movieName = preName.substring(0, match['index'] + 5).replace(new RegExp('\\.', 'g'), ' ');
-  return movieName;
-}
-
-var stripReleaseInfoExcludeYear = function(preName) {
-  var myRegexp = /(.\d{4}.)/;
-  var match = myRegexp.exec(preName);
-  let movieName = preName.substring(0, match['index']).replace(new RegExp('\\.', 'g'), ' ');
   return movieName;
 }
 
