@@ -39,7 +39,7 @@ var getMovies = function() {
             slack.send('Filmtips: *' + imdbMovie.name + '* med iMDB betyg: *' + imdbMovie.rating + '*\n' + imdbMovie.url);
             console.log(' Filmtips: ' + imdbMovie.name + ' med iMDB betyg ' + imdbMovie.rating);
             // MOVIE;SFV;oscar@vettig.se;Movie name
-            fs.appendFile(properties.requestFile, 'MOVIE;' + imdbMovie + '\n');
+            fs.appendFile(properties.requestFile, 'MOVIE;' + movie + '\n');
           }
           res();
         }, function(err) {
