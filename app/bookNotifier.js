@@ -4,15 +4,15 @@ var Promise = require('promise');
 var slack = require('./slack.js');
 var fs = require('fs');
 
+let properties;
+
 var runBookNotifier = function() {
   console.log("Startar bok notifieraren...");
-  return new Promise(function(res, rej) {
-    getPropertiesFile().then((property) => {
-      properties = JSON.parse(property);
-      getBooks().then(() => {
-        res();
-      });
-    });
+  getPropertiesFile().then((property) => {
+    properties = JSON.parse(property);
+    getBooks();
+  }).catch((error) => {
+    console.error(error);
   });
 }
 
@@ -25,27 +25,28 @@ var getPropertiesFile = function() {
 }
 
 var getBooks = function() {
-  return new Promise(function(res, rej) {
-    getBooksFile().then((bookList) => {
-      books = JSON.parse(bookList);
-      books.forEach((book) => {
-        getLatestBook(book).then(function(latestBook) {
-          if (book.latestBook === null || book.latestBook === undefined || book.latestBook === '') {
-            book.latestBook = latestBook;
-            console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook);
-          } else if (book.latestBook !== latestBook) {
-            book.latestBook = latestBook;
-            slack.send('Boktips - ny bok av ' + book.author + ' -> ' + latestBook);
-            console.log(" Boktips - ny bok av " + book.author + " -> " + latestBook);
-          } else {
-            console.log(" Inga nyheter för " + book.author);
-          }
-          
-          fs.writeFile(__dirname+'/books.json', JSON.stringify(books));
-          res();
-        });
+  getBooksFile().then((bookList) => {
+    books = JSON.parse(bookList);
+    books.forEach((book) => {
+      getLatestBook(book).then(function(latestBook) {
+        if (book.latestBook === null || book.latestBook === undefined || book.latestBook === '') {
+          book.latestBook = latestBook;
+          console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook);
+        } else if (book.latestBook !== latestBook) {
+          book.latestBook = latestBook;
+          slack.send('Boktips - ny bok av ' + book.author + ' -> ' + latestBook);
+          console.log(" Boktips - ny bok av " + book.author + " -> " + latestBook);
+        } else {
+          console.log(" Inga nyheter för " + book.author);
+        }
+        
+        fs.writeFileSync(__dirname+'/books.json', JSON.stringify(books));
+      }).catch((error) => {
+        console.error(error);
       });
     });
+  }).catch((error) => {
+    console.error(error);
   });
 }
 

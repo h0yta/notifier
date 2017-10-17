@@ -7,6 +7,8 @@ var sendNotification = function(message) {
     getPropertiesFile().then((property) => {
       let properties = JSON.parse(property);
       sendSlackNotification(properties.apiToken, message);
+    }).catch((error) => {
+      console.error(error);
     });
   });
 }
