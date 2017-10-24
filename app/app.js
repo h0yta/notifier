@@ -1,16 +1,31 @@
-var dateFormat = require('dateformat');
-var bookNotifier = require('./bookNotifier');
+const program = require('commander');
+const stringSimilarity = require('string-similarity');
+const dateFormat = require('dateformat');
+const bookNotifier = require('./bookNotifier');
 
-var init = function() {
-  var argv = require('minimist')(process.argv.slice(2));
-  argv._.forEach((notifierName) => {
-    runNotifier(notifierName);
-  })
+const init = function() {
+  program
+  .version('0.1.1')
+  .option('-a --action <action>', 'Action: Books')
+  .parse(process.argv);
+
+  if (!process.argv.slice(2).length) {
+    program.outputHelp();
+    return;
+  }
+
+  var matches = stringSimilarity.findBestMatch(program.action, ['books']);
+  if(matches.bestMatch.rating === 1) {
+    run(program.action);
+  } else {
+    console.log(' \'' + program.action + '\' is not a valid action. See --help');
+    console.log(' Did you mean \t\'' + matches.bestMatch.target + '\'');
+  }
 }
 
-var runNotifier = function(notifierName) {
+const run = function(notifierName) {
   switch(notifierName) {
-    case 'book':
+    case 'books':
       bookNotifier.run();
     break;
   }

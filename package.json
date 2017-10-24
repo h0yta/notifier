@@ -1,6 +1,6 @@
 {
-  "name": "bookFinder",
-  "version": "0.0.1",
+  "name": "notifier",
+  "version": "0.1.1",
   "description": "Hitta din bok!",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hoyta/bookFinder.git"
+    "url": "git+https://github.com/h0yta/notifier.git"
   },
   "keywords": [
     "books"
@@ -16,17 +16,18 @@
   "author": "hoyta",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hoyta/bookFinder/issues"
+    "url": "https://github.com/h0yta/notifier/issues"
   },
-  "homepage": "https://github.com/hoyta/bookFinder#readme",
+  "homepage": "https://github.com/h0yta/notifier#readme",
   "dependencies": {
-    "slack-node": "0.1.8",
     "cheerio": "0.22.0",
+    "commander": "^2.11.0",
+    "dateformat": "3.0.2",
+    "minimist": "1.2.0",
     "promise": "7.1.1",
     "request": "2.79.0",
-    "dateformat": "3.0.2",
-    "minimist": "1.2.0"
+    "slack-node": "0.1.8",
+    "string-similarity": "^1.2.0"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

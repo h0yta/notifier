@@ -4,27 +4,9 @@ var Promise = require('promise');
 var slack = require('./slack.js');
 var fs = require('fs');
 
-let properties;
+let properties = require('./properties.json');
 
-var runBookNotifier = function() {
-  console.log("Startar bok notifieraren...");
-  getPropertiesFile().then((property) => {
-    properties = JSON.parse(property);
-    getBooks();
-  }).catch((error) => {
-    console.error(error);
-  });
-}
-
-var getPropertiesFile = function() {
-  return new Promise(function(res, rej) {
-    fs.readFile(__dirname+'/properties.json', 'utf8', function(err, data) {
-      res(data);
-    });
-  });
-}
-
-var getBooks = function() {
+var run = function() {
   getBooksFile().then((bookList) => {
     books = JSON.parse(bookList);
     books.forEach((book) => {
@@ -78,4 +60,4 @@ var getLatestBook = function(book) {
   });
 }
 
-exports.run = runBookNotifier;
+exports.run = run;
