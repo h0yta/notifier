@@ -6,23 +6,29 @@ var fs = require('fs');
 
 let properties = require('./properties.json');
 
-var run = function() {
+var run = function () {
   getBooksFile().then((bookList) => {
-    books = JSON.parse(bookList);
-    books.forEach((book) => {
-      getLatestBook(book).then(function(latestBook) {
-        if (book.latestBook === null || book.latestBook === undefined || book.latestBook === '') {
-          book.latestBook = latestBook;
-          console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook);
-        } else if (book.latestBook !== latestBook) {
-          book.latestBook = latestBook;
-          slack.send('Boktips - ny bok av ' + book.author + ' -> ' + latestBook);
-          console.log(" Boktips - ny bok av " + book.author + " -> " + latestBook);
+    bookList.forEach((book) => {
+      getLatestBook(book).then(function (latestBook) {
+        if (book.latestBookTitle === null || book.latestBookTitle === undefined || book.latestBookTitle === '') {
+          book.latestBookTitle = latestBook.title;
+          book.latestBookStatus = latestBook.status;
+          console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook.title);
+        } else if (book.latestBookTitle !== latestBook.title) {
+          book.latestBookTitle = latestBook.title;
+          book.latestBookStatus = latestBook.status;
+          slack.send("Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+          console.log(" Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+        } else if (book.latestBookStatus !== latestBook.status) {
+          book.latestBookTitle = latestBook.title;
+          book.latestBookStatus = latestBook.status;
+          slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+          console.log(" Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
         } else {
           console.log(" Inga nyheter för " + book.author);
         }
-        
-        fs.writeFileSync(__dirname+'/books.json', JSON.stringify(books));
+
+        fs.writeFileSync(__dirname + '/books.json', JSON.stringify(bookList, null, 2));
       }).catch((error) => {
         console.error(error);
       });
@@ -32,16 +38,16 @@ var run = function() {
   });
 }
 
-var getBooksFile = function() {
-  return new Promise(function(res, rej) {
-    fs.readFile(__dirname + '/books.json', 'utf8', function(err, data) {
-      res(data);
+var getBooksFile = function () {
+  return new Promise(function (res, rej) {
+    fs.readFile(__dirname + '/books.json', 'utf8', function (err, data) {
+      res(JSON.parse(data));
     });
   });
 }
 
-var getLatestBook = function(book) {
-  return new Promise(function(resolve, reject) {
+var getLatestBook = function (book) {
+  return new Promise(function (resolve, reject) {
     var url = properties.adlibrisUrl.replace("#####", book.author);
     request(url, function (err, response, body) {
       if (err) {
@@ -49,15 +55,28 @@ var getLatestBook = function(book) {
       } else {
         var $ = cheerio.load(body);
         var books = [];
-        $('.heading--searchlist-title').each(function(i, elem) {
-          var book = $(this).text().trim();
-          books[i] = book;
-        });
-        
-        resolve(books[0]);
+        let first = $('.purchase-and-processing').children().first();
+
+        let title = first.find($('.heading--searchlist-title')).text().trim();
+        let status = first.find($('.processing-time')).children().first().text().trim();
+
+        let book = {
+          'title': title,
+          'status': translateStatus(status)
+        }
+
+        resolve(book);
       }
     });
   });
+}
+
+const translateStatus = (status) => {
+  if (status === 'Ännu ej utkommen') {
+    return 'Kommande';
+  } else {
+    return 'I lager';
+  }
 }
 
 exports.run = run;
