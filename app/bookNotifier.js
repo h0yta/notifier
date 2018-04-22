@@ -30,10 +30,12 @@ var run = function () {
 
         fs.writeFileSync(__dirname + '/books.json', JSON.stringify(bookList, null, 2));
       }).catch((error) => {
+        slack.send("Help me I crashed trying to find the latest book.");
         console.error(error);
       });
     });
   }).catch((error) => {
+    slack.send("Help me I crashed trying to read the book file.");
     console.error(error);
   });
 }
@@ -41,7 +43,11 @@ var run = function () {
 var getBooksFile = function () {
   return new Promise(function (res, rej) {
     fs.readFile(__dirname + '/books.json', 'utf8', function (err, data) {
-      res(JSON.parse(data));
+      try {
+        res(JSON.parse(data));
+      } catch (error) {
+        rej(error);
+      }
     });
   });
 }
@@ -51,7 +57,8 @@ var getLatestBook = function (book) {
     var url = properties.adlibrisUrl.replace("#####", book.author);
     request(url, function (err, response, body) {
       if (err) {
-        console.err(" Something went wrong, couldn't parse parseBookInfo.")
+        console.err(" Something went wrong, couldn't parse parseBookInfo.");
+        rej(err);
       } else {
         var $ = cheerio.load(body);
         var books = [];
