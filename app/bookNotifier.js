@@ -19,12 +19,12 @@ var run = function () {
           } else if (book.latestBookTitle !== latestBook.title) {
             book.latestBookTitle = latestBook.title;
             book.latestBookStatus = latestBook.status;
-            //slack.send("Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+            slack.send("Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
             console.log(" Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
           } else if (book.latestBookStatus !== latestBook.status) {
             book.latestBookTitle = latestBook.title;
             book.latestBookStatus = latestBook.status;
-            //slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+            slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
             console.log(" Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
           } else {
             console.log(" Inga nyheter för " + book.author);
@@ -66,12 +66,8 @@ var getLatestBook = function (book) {
         var $ = cheerio.load(iconv.decode(body, 'iso-8859-1'));
         let first = $('.ProductList__item').children().first();
 
-        //console.log('body', first.html());
         let title = first.find($('.Item__title--large')).text().trim();
-        console.log('title: \'', title, '\'');
         let status = first.find($('.ProductList__status')).text().trim();
-        console.log('status: \'', status, '\'');
-
         let book = {
           'title': title,
           'status': translateStatus(status)
