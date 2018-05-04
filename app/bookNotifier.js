@@ -1,4 +1,5 @@
 var request = require('request');
+var iconv = require('iconv-lite');
 var cheerio = require('cheerio');
 var Promise = require('promise');
 var slack = require('./slack.js');
@@ -10,25 +11,27 @@ var run = function () {
   getBooksFile().then((bookList) => {
     bookList.forEach((book) => {
       getLatestBook(book).then(function (latestBook) {
-        if (book.latestBookTitle === null || book.latestBookTitle === undefined || book.latestBookTitle === '') {
-          book.latestBookTitle = latestBook.title;
-          book.latestBookStatus = latestBook.status;
-          console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook.title);
-        } else if (book.latestBookTitle !== latestBook.title) {
-          book.latestBookTitle = latestBook.title;
-          book.latestBookStatus = latestBook.status;
-          slack.send("Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
-          console.log(" Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
-        } else if (book.latestBookStatus !== latestBook.status) {
-          book.latestBookTitle = latestBook.title;
-          book.latestBookStatus = latestBook.status;
-          slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
-          console.log(" Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
-        } else {
-          console.log(" Inga nyheter för " + book.author);
-        }
+        if (latestBook.title !== '') {
+          if (book.latestBookTitle === null || book.latestBookTitle === undefined || book.latestBookTitle === '') {
+            book.latestBookTitle = latestBook.title;
+            book.latestBookStatus = latestBook.status;
+            console.log(" Saknar bok för " + book.author + " sparar senaste -> " + latestBook.title);
+          } else if (book.latestBookTitle !== latestBook.title) {
+            book.latestBookTitle = latestBook.title;
+            book.latestBookStatus = latestBook.status;
+            //slack.send("Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+            console.log(" Boktips - ny bok '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+          } else if (book.latestBookStatus !== latestBook.status) {
+            book.latestBookTitle = latestBook.title;
+            book.latestBookStatus = latestBook.status;
+            //slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+            console.log(" Boktips - ny status för boken '" + latestBook.title + "' av " + book.author + " (" + latestBook.status + ")");
+          } else {
+            console.log(" Inga nyheter för " + book.author);
+          }
 
-        fs.writeFileSync(__dirname + '/books.json', JSON.stringify(bookList, null, 2));
+          fs.writeFileSync(__dirname + '/books.json', JSON.stringify(bookList, null, 2));
+        }
       }).catch((error) => {
         slack.send("Help me I crashed trying to find the latest book.");
         console.error(error);
@@ -54,18 +57,20 @@ var getBooksFile = function () {
 
 var getLatestBook = function (book) {
   return new Promise(function (resolve, reject) {
-    var url = properties.adlibrisUrl.replace("#####", book.author);
-    request(url, function (err, response, body) {
+    var url = properties.bokusUrl.replace("#####", book.author);
+    request({ 'url': url, encoding: null }, function (err, response, body) {
       if (err) {
         console.err(" Something went wrong, couldn't parse parseBookInfo.");
         rej(err);
       } else {
-        var $ = cheerio.load(body);
-        var books = [];
-        let first = $('.purchase-and-processing').children().first();
+        var $ = cheerio.load(iconv.decode(body, 'iso-8859-1'));
+        let first = $('.ProductList__item').children().first();
 
-        let title = first.find($('.heading--searchlist-title')).text().trim();
-        let status = first.find($('.processing-time')).children().first().text().trim();
+        //console.log('body', first.html());
+        let title = first.find($('.Item__title--large')).text().trim();
+        console.log('title: \'', title, '\'');
+        let status = first.find($('.ProductList__status')).text().trim();
+        console.log('status: \'', status, '\'');
 
         let book = {
           'title': title,
