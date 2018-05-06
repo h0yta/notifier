@@ -13,10 +13,17 @@ var run = async function () {
   try {
     let bookList = await getBooksFile();
     let newBookList = await Promise.all(bookList.map(async (book) => {
-      let latestAdlibrisBook = await getLatestBookAdlibris(book);
-      let latestBokusBook = await getLatestBookBokus(book);
 
-      return processBook(book, latestAdlibrisBook);
+      let latestAdlibrisBook = await getLatestBookAdlibris(book);
+      addPoints(book, latestAdlibrisBook);
+      //console.log(latestAdlibrisBook);
+
+      let latestBokusBook = await getLatestBookBokus(book);
+      addPoints(book, latestBokusBook);
+      //console.log(latestBokusBook);
+
+      let bestMatch = findBestMatch(latestAdlibrisBook, latestBokusBook);
+      return processBook(book, bestMatch);
     }));
 
     fs.writeFileSync(__dirname + '/books.json', JSON.stringify(newBookList, null, 2));
@@ -33,11 +40,16 @@ var getBooksFile = async function () {
 var getLatestBookBokus = async function (book) {
   return new Promise(function (resolve, reject) {
     var url = properties.bokusUrl.replace("#####", book.author);
-    request(url, function (err, response, body) {
+    request({
+      'url': url,
+      'encoding': null
+    }, function (err, response, body) {
       if (err) {
         console.err(" Something went wrong, couldn't parse parseBookInfo.")
       } else {
-        var $ = cheerio.load(iconv.decode(body, 'iso-8859-1'));
+        let decodedBody = iconv.decode(body, 'windows-1252');
+
+        var $ = cheerio.load(decodedBody);
         let first = $('.ProductList__item')
           .children()
           .first();
@@ -99,6 +111,8 @@ const translateStatus = (status) => {
     return 'Kommande';
   } else if (status.indexOf('Förväntas skickas under') === 0) {
     return 'Förhandsboka';
+  } else if (status === 'Tillfälligt slut') {
+    return 'Tillfälligt slut';
   } else {
     return 'I lager';
   }
@@ -112,13 +126,17 @@ const processBook = (storedBook, latestBook) => {
   } else if (storedBook.latestBookTitle !== latestBook.title) {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
-    slack.send("Boktips - ny bok '" + latestBook.title + "' av " + storedBook.author + " (" + latestBook.status + ")");
-    console.log(" Boktips - ny bok '" + latestBook.title + "' av " + storedBook.author + " (" + latestBook.status + ")");
+    slack.send("Boktips - ny bok '" + latestBook.title + "' av " + storedBook.author
+      + " (" + latestBook.status + " - " + latestBook.store + ")");
+    console.log(" Boktips - ny bok '" + latestBook.title + "' av " + storedBook.author
+      + " (" + latestBook.status + " - " + latestBook.store + ")");
   } else if (storedBook.latestBookStatus !== latestBook.status) {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
-    slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + storedBook.author + " (" + latestBook.status + ")");
-    console.log(" Boktips - ny status för boken '" + latestBook.title + "' av " + storedBook.author + " (" + latestBook.status + ")");
+    slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + storedBook.author
+      + " (" + latestBook.status + " - " + latestBook.store + ")");
+    console.log(" Boktips - ny status för boken '" + latestBook.title + "' av " + storedBook.author
+      + " (" + latestBook.status + " - " + latestBook.store + ")");
   } else {
     console.log(" Inga nyheter för " + storedBook.author);
   }
@@ -126,17 +144,34 @@ const processBook = (storedBook, latestBook) => {
   return storedBook;
 }
 
-const findLatest = (stored, bookstore) => {
-  if (bookstore.title !== stored.title) {
-    bookstore.points = 5;
-  } else if (bookstore.status !== stored.status) {
-    bookstore.points = 2;
+const addPoints = (stored, bookstore) => {
+  bookstore.points = 0;
+  if (bookstore.title !== stored.latestBookTitle) {
+    bookstore.points += 5;
+  }
 
-    if (bookstore.status === 'I lager') {
-      bookstore.points += 2;
-    } else if (bookstore.status === 'Förhandsboka') {
-      bookstore.points += 1;
-    }
+  if (stored.latestBookStatus === 'I lager') {
+    bookstore.points -= 3;
+  } else if (stored.latestBookStatus === 'Förhandsboka') {
+    bookstore.points -= 2;
+  } else if (stored.latestBookStatus === 'Kommande') {
+    bookstore.points -= 1;
+  }
+
+  if (bookstore.status === 'I lager') {
+    bookstore.points += 3;
+  } else if (bookstore.status === 'Förhandsboka') {
+    bookstore.points += 2;
+  } else if (bookstore.status === 'Kommande') {
+    bookstore.points += 1;
+  }
+}
+
+const findBestMatch = (adlibris, bokus) => {
+  if (adlibris.points > bokus.points) {
+    return adlibris;
+  } else {
+    return bokus;
   }
 }
 
