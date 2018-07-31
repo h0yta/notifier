@@ -28,7 +28,7 @@ const sendSlackNotification = function (apiToken, message) {
     console.log('Slack was turned off!');
     return;
   }
-  return;
+
   let Slack = require('slack-node');
   slack = new Slack(apiToken);
   slack.api('chat.postMessage', {
