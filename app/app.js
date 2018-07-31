@@ -3,19 +3,19 @@ const stringSimilarity = require('string-similarity');
 const dateFormat = require('dateformat');
 const bookNotifier = require('./bookNotifier');
 
-const init = function() {
+const init = function () {
   program
-  .version('0.1.1')
-  .option('-a --action <action>', 'Action: Books')
-  .parse(process.argv);
+    .version('0.1.1')
+    .option('-a --action <action>', 'Action: Books')
+    .parse(process.argv);
 
   if (!process.argv.slice(2).length) {
     program.outputHelp();
     return;
   }
 
-  var matches = stringSimilarity.findBestMatch(program.action, ['books']);
-  if(matches.bestMatch.rating === 1) {
+  let matches = stringSimilarity.findBestMatch(program.action, ['books']);
+  if (matches.bestMatch.rating === 1) {
     run(program.action);
   } else {
     console.log(' \'' + program.action + '\' is not a valid action. See --help');
@@ -23,11 +23,11 @@ const init = function() {
   }
 }
 
-const run = function(notifierName) {
-  switch(notifierName) {
+const run = function (notifierName) {
+  switch (notifierName) {
     case 'books':
       bookNotifier.run();
-    break;
+      break;
   }
 }
 

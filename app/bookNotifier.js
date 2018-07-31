@@ -1,13 +1,14 @@
-var request = require('request');
-var iconv = require('iconv-lite');
-var cheerio = require('cheerio');
-var Promise = require('promise');
-var slack = require('./slack.js');
-var fs = require('fs');
+const request = require('request');
+const iconv = require('iconv-lite');
+const cheerio = require('cheerio');
+const Promise = require('promise');
+const stringSimilarity = require('string-similarity');
+const slack = require('./slack.js');
+const fs = require('fs');
 
 let properties = require('./properties.json');
 
-var run = async function () {
+const run = async function () {
   iconv.skipDecodeWarning = true;
 
   try {
@@ -32,14 +33,14 @@ var run = async function () {
   }
 }
 
-var getBooksFile = async function () {
+const getBooksFile = async function () {
   let data = fs.readFileSync(__dirname + '/books.json', 'utf8');
   return JSON.parse(data);
 }
 
-var getLatestBookBokus = async function (book) {
+const getLatestBookBokus = async function (book) {
   return new Promise(function (resolve, reject) {
-    var url = properties.bokusUrl.replace("#####", book.author);
+    let url = properties.bokusUrl.replace("#####", book.author);
     request({
       'url': url,
       'encoding': null
@@ -49,7 +50,7 @@ var getLatestBookBokus = async function (book) {
       } else {
         let decodedBody = iconv.decode(body, 'windows-1252');
 
-        var $ = cheerio.load(decodedBody);
+        let $ = cheerio.load(decodedBody);
         let first = $('.ProductList__item')
           .children()
           .first();
@@ -72,15 +73,15 @@ var getLatestBookBokus = async function (book) {
   });
 }
 
-var getLatestBookAdlibris = function (book) {
+const getLatestBookAdlibris = function (book) {
   return new Promise(function (resolve, reject) {
-    var url = properties.adlibrisUrl.replace("#####", book.author);
+    let url = properties.adlibrisUrl.replace("#####", book.author);
     request(url, function (err, response, body) {
       if (err) {
         console.err(" Something went wrong, couldn't parse parseBookInfo.")
       } else {
-        var $ = cheerio.load(body);
-        var books = [];
+        let $ = cheerio.load(body);
+        let books = [];
         let first = $('.purchase-and-processing')
           .children()
           .first();
@@ -123,7 +124,7 @@ const processBook = (storedBook, latestBook) => {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
     console.log(" Saknar bok för " + storedBook.author + " sparar senaste -> " + latestBook.title);
-  } else if (storedBook.latestBookTitle !== latestBook.title) {
+  } else if (!titleMatch(storedBook.latestBookTitle, latestBook.title)) {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
     slack.send("Boktips - ny bok '" + latestBook.title + "' av " + storedBook.author
@@ -142,6 +143,11 @@ const processBook = (storedBook, latestBook) => {
   }
 
   return storedBook;
+}
+
+const titleMatch = (storedBook, latestBook) => {
+  let sim = stringSimilarity.compareTwoStrings(storedBook, latestBook);
+  return sim > 0.9;
 }
 
 const addPoints = (stored, bookstore) => {

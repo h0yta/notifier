@@ -1,10 +1,10 @@
-var Promise = require('promise');
-var Slack = require('slack-node');
-var fs = require('fs');
+const Promise = require('promise');
+const Slack = require('slack-node');
+const fs = require('fs');
 
 let properties = require('./properties.json');
 
-var sendNotification = function (message) {
+const sendNotification = function (message) {
   return new Promise(function (res, rej) {
     getPropertiesFile().then((property) => {
       let properties = JSON.parse(property);
@@ -15,7 +15,7 @@ var sendNotification = function (message) {
   });
 }
 
-var getPropertiesFile = function () {
+const getPropertiesFile = function () {
   return new Promise(function (res, rej) {
     fs.readFile(__dirname + '/properties.json', 'utf8', function (err, data) {
       res(data);
@@ -23,13 +23,13 @@ var getPropertiesFile = function () {
   });
 }
 
-var sendSlackNotification = function (apiToken, message) {
+const sendSlackNotification = function (apiToken, message) {
   if (properties.skipSlack) {
     console.log('Slack was turned off!');
     return;
   }
   return;
-  var Slack = require('slack-node');
+  let Slack = require('slack-node');
   slack = new Slack(apiToken);
   slack.api('chat.postMessage', {
     text: message,
