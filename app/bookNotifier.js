@@ -25,7 +25,10 @@ const run = async function () {
       //console.log(latestBokusBook);
 
       let bestMatch = findBestMatch(latestAdlibrisBook, latestBokusBook);
-      return processBook(book, bestMatch);
+      let libraryBook = await getLibraryBook(bestMatch);
+      addPoints(book, libraryBook);
+
+      return processBook(book, libraryBook);
     }));
 
     fs.writeFileSync(__dirname + '/books.json', JSON.stringify(newBookList, null, 2));
@@ -62,6 +65,7 @@ const getLatestBookBokus = async function (book) {
         let status = first.find($('.ProductList__status'))
           .text()
           .trim();
+
         let book = {
           'title': title,
           'status': translateStatus(status),
@@ -108,12 +112,42 @@ const getLatestBookAdlibris = function (book) {
   });
 }
 
+const getLibraryBook = function (book) {
+  return new Promise(function (resolve, reject) {
+    let url = properties.libraryUrl.replace("#####", book.title);
+    request(url, function (err, response, body) {
+      if (err) {
+        console.err(" Something went wrong, couldn't parse parseBookInfo.")
+      } else {
+        let $ = cheerio.load(body);
+        let result = $('.catalog-search-result-container')
+          .html();
+
+        console.log(result);
+
+        let status = book.status;
+        if (result) {
+          status = 'Tillgänglig på biblioteket';
+        }
+
+        let libBook = {
+          'title': book.title,
+          'status': status,
+          'store': book.store
+        }
+
+        resolve(libBook);
+      }
+    });
+  });
+}
+
 const translateStatus = (status) => {
-  if (status === 'Ännu ej utkommen') {
+  if (stringSimilarity.compareTwoStrings(status, 'Ännu ej utkommen') > 0.95) {
     return 'Kommande';
   } else if (status.indexOf('Förväntas skickas under') === 0) {
     return 'Förhandsboka';
-  } else if (status === 'Tillfälligt slut') {
+  } else if (stringSimilarity.compareTwoStrings(status, 'Tillfälligt slut') > 0.95) {
     return 'Tillfälligt slut';
   } else {
     return 'I lager';
@@ -157,7 +191,9 @@ const addPoints = (stored, bookstore) => {
     bookstore.points += 5;
   }
 
-  if (stored.latestBookStatus === 'I lager') {
+  if (stored.latestBookStatus === 'Tillgänglig på biblioteket') {
+    bookstore.points -= 4;
+  } else if (stored.latestBookStatus === 'I lager') {
     bookstore.points -= 3;
   } else if (stored.latestBookStatus === 'Förhandsboka') {
     bookstore.points -= 2;
@@ -165,7 +201,9 @@ const addPoints = (stored, bookstore) => {
     bookstore.points -= 1;
   }
 
-  if (bookstore.status === 'I lager') {
+  if (bookstore.status === 'Tillgänglig på biblioteket') {
+    bookstore.points += 4;
+  } else if (bookstore.status === 'I lager') {
     bookstore.points += 3;
   } else if (bookstore.status === 'Förhandsboka') {
     bookstore.points += 2;
