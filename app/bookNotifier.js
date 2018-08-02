@@ -66,6 +66,8 @@ const getLatestBookBokus = async function (book) {
           .text()
           .trim();
 
+        //console.log('Bokus status: ', status);
+
         let book = {
           'title': title,
           'status': translateStatus(status),
@@ -99,6 +101,8 @@ const getLatestBookAdlibris = function (book) {
           .end()
           .text()
           .trim();
+
+        //console.log('Adlibris status: ', status);
 
         let book = {
           'title': title,
@@ -144,7 +148,8 @@ const getLibraryBook = function (book) {
 const translateStatus = (status) => {
   if (stringSimilarity.compareTwoStrings(status, 'Ännu ej utkommen') > 0.95) {
     return 'Kommande';
-  } else if (status.indexOf('Förväntas skickas under') === 0) {
+  } else if (stringSimilarity.compareTwoStrings(status, 'Förväntas skickas under') >= 0.8
+    || stringSimilarity.compareTwoStrings(status, 'Förboka gärna! Förväntad leverans under vecka') >= 0.8) {
     return 'Förhandsboka';
   } else if (stringSimilarity.compareTwoStrings(status, 'Tillfälligt slut') > 0.95) {
     return 'Tillfälligt slut';
