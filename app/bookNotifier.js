@@ -120,11 +120,12 @@ const getLibraryBook = function (book) {
         console.err(" Something went wrong, couldn't parse parseBookInfo.")
       } else {
         let $ = cheerio.load(body);
-        let result = $('.catalog-search-result-container')
-          .html();
+        let result = $('.result-count')
+          .first()
+          .text();
 
         let status = book.status;
-        if (result) {
+        if (parseInt(result) >= 1) {
           status = 'Tillgänglig på biblioteket';
         }
 
