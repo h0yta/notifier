@@ -166,14 +166,14 @@ const processBook = (storedBook, latestBook) => {
   } else if (!titleMatch(storedBook.latestBookTitle, latestBook.title)) {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
-    slack.send("Boktips - ny bok '" + latestBook.title + "' av " + storedBook.author
+    slack.send("Ny bok '" + latestBook.title + "' av " + storedBook.author
       + " (" + latestBook.status + " - " + latestBook.store + ")");
     console.log(" " + dateFormat(new Date(), 'yyyy-mm-dd') + " - Ny bok '" + latestBook.title + "' av " + storedBook.author
       + " (" + latestBook.status + " - " + latestBook.store + ")");
   } else if (storedBook.latestBookStatus !== latestBook.status) {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
-    slack.send("Boktips - ny status för boken '" + latestBook.title + "' av " + storedBook.author
+    slack.send("Ny status för boken '" + latestBook.title + "' av " + storedBook.author
       + " (" + latestBook.status + " - " + latestBook.store + ")");
     console.log(" " + dateFormat(new Date(), 'yyyy-mm-dd') + " - Ny status för boken '" + latestBook.title + "' av " + storedBook.author
       + " (" + latestBook.status + " - " + latestBook.store + ")");
