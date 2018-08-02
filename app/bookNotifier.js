@@ -123,8 +123,6 @@ const getLibraryBook = function (book) {
         let result = $('.catalog-search-result-container')
           .html();
 
-        console.log(result);
-
         let status = book.status;
         if (result) {
           status = 'Tillgänglig på biblioteket';
