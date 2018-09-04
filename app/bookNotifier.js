@@ -159,7 +159,10 @@ const translateStatus = (status) => {
 }
 
 const processBook = (storedBook, latestBook) => {
-  if (storedBook.latestBookTitle === null || storedBook.latestBookTitle === undefined || storedBook.latestBookTitle === '') {
+  if (latestBook.title === null || latestBook.title === undefined || latestBook.title.trim() === '') {
+    console.log(" " + dateFormat(new Date(), 'yyyy-mm-dd') + " - FEL! Kunde inte hitta nån bok alls för " + storedBook.author);
+    slack.send("FEL! Kunde inte hitta nån bok alls för " + storedBook.author);
+  } else if (storedBook.latestBookTitle === null || storedBook.latestBookTitle === undefined || storedBook.latestBookTitle === '') {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
     console.log(" " + dateFormat(new Date(), 'yyyy-mm-dd') + " - Saknar bok för " + storedBook.author + " sparar senaste -> " + latestBook.title);
@@ -167,18 +170,16 @@ const processBook = (storedBook, latestBook) => {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
     slack.send("Ny bok '" + latestBook.title + "' av " + storedBook.author
-      + " (" + latestBook.status + " - " + latestBook.store + ")");
+      + " (" + latestBook.status + ")");
     console.log(" " + dateFormat(new Date(), 'yyyy-mm-dd') + " - Ny bok '" + latestBook.title + "' av " + storedBook.author
-      + " (" + latestBook.status + " - " + latestBook.store + ")");
+      + " (" + latestBook.status + " hos " + latestBook.store + ")");
   } else if (storedBook.latestBookStatus !== latestBook.status) {
     storedBook.latestBookTitle = latestBook.title;
     storedBook.latestBookStatus = latestBook.status;
     slack.send("Ny status för boken '" + latestBook.title + "' av " + storedBook.author
-      + " (" + latestBook.status + " - " + latestBook.store + ")");
+      + " (" + latestBook.status + ")");
     console.log(" " + dateFormat(new Date(), 'yyyy-mm-dd') + " - Ny status för boken '" + latestBook.title + "' av " + storedBook.author
-      + " (" + latestBook.status + " - " + latestBook.store + ")");
-  } else {
-    //console.log(" Inga nyheter för " + storedBook.author);
+      + " (" + latestBook.status + " hos " + latestBook.store + ")");
   }
 
   return storedBook;
