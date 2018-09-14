@@ -18,11 +18,11 @@ const run = async function () {
 
       let latestAdlibrisBook = await getLatestBookAdlibris(book);
       addPoints(book, latestAdlibrisBook);
-      //console.log(latestAdlibrisBook);
+      console.log(latestAdlibrisBook);
 
       let latestBokusBook = await getLatestBookBokus(book);
       addPoints(book, latestBokusBook);
-      //console.log(latestBokusBook);
+      console.log(latestBokusBook);
 
       let bestMatch = findBestMatch(latestAdlibrisBook, latestBokusBook);
       let libraryBook = await getLibraryBook(bestMatch);
@@ -89,12 +89,15 @@ const getLatestBookAdlibris = function (book) {
       } else {
         let $ = cheerio.load(body);
         let books = [];
-        let first = $('.purchase-and-processing')
+        let first = $('.search-result__list-view__product__wrapper')
           .children()
           .first();
-
-        let title = first.find($('.heading--searchlist-title')).text().trim();
-        let status = first.find($('span.processing-time'))
+        let title = first.find($('.search-result__product__name')).text().trim();
+        let iLagerStatus = first.find($('.element--desktop-only'))
+          .text()
+          .replace(/\s\s/g / '')
+          .trim();
+        let kommandeStatus = first.find($('span.processing-time'))
           .clone()
           .children()
           .remove()
@@ -102,7 +105,10 @@ const getLatestBookAdlibris = function (book) {
           .text()
           .trim();
 
-        //console.log('Adlibris status: ', status);
+        let status = kommandeStatus;
+        if (status === '') {
+          status = iLagerStatus;
+        }
 
         let book = {
           'title': title,
@@ -192,7 +198,9 @@ const titleMatch = (storedBook, latestBook) => {
 
 const addPoints = (stored, bookstore) => {
   bookstore.points = 0;
-  if (bookstore.title !== stored.latestBookTitle) {
+  if (bookstore.title === null || bookstore.title === undefined || bookstore.title.trim() === '') {
+    bookstore.points -= 100;
+  } else if (bookstore.title !== stored.latestBookTitle) {
     bookstore.points += 5;
   }
 
