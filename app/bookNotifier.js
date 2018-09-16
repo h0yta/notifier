@@ -18,11 +18,11 @@ const run = async function () {
 
       let latestAdlibrisBook = await getLatestBookAdlibris(book);
       addPoints(book, latestAdlibrisBook);
-      console.log(latestAdlibrisBook);
+      //console.log(latestAdlibrisBook);
 
       let latestBokusBook = await getLatestBookBokus(book);
       addPoints(book, latestBokusBook);
-      console.log(latestBokusBook);
+      //console.log(latestBokusBook);
 
       let bestMatch = findBestMatch(latestAdlibrisBook, latestBokusBook);
       let libraryBook = await getLibraryBook(bestMatch);
