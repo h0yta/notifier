@@ -193,7 +193,13 @@ const processBook = (storedBook, latestBook) => {
 
 const titleMatch = (storedBook, latestBook) => {
   let sim = stringSimilarity.compareTwoStrings(storedBook, latestBook);
-  return sim > 0.9;
+  if (sim > 0.9) {
+    return true;
+  }
+
+  let sl = storedBook.trim().indexOf(latestBook.trim());
+  let ls = latestBook.trim().indexOf(storedBook.trim());
+  return (sl === 0 || ls === 0) && sim > 0.5;
 }
 
 const addPoints = (stored, bookstore) => {
