@@ -25,7 +25,11 @@ const run = async function () {
       //console.log(latestBokusBook);
 
       let bestMatch = findBestMatch(latestAdlibrisBook, latestBokusBook);
-      let libraryBook = await getLibraryBook(bestMatch);
+
+      let libraryBook = await getVrydLibraryBook(bestMatch);
+      addPoints(book, libraryBook);
+
+      libraryBook = await getJkpgLibraryBook(libraryBook);
       addPoints(book, libraryBook);
 
       return processBook(book, libraryBook);
@@ -122,27 +126,68 @@ const getLatestBookAdlibris = function (book) {
   });
 }
 
-const getLibraryBook = function (book) {
+const getJkpgLibraryBook = function (book) {
   return new Promise(function (resolve, reject) {
-    let url = properties.libraryUrl.replace("#####", book.title);
+    let url = properties.jkpgLibraryUrl.replace("#####", book.title);
     request(url, function (err, response, body) {
       if (err) {
         console.err(" Something went wrong, couldn't parse parseBookInfo.")
       } else {
         let $ = cheerio.load(body);
-        let result = $('.result-count')
+        let result = $('.work-link')
           .first()
-          .text();
+          .html();
 
+        console.log('result', result);
         let status = book.status;
-        if (parseInt(result) >= 1) {
-          status = 'Tillgänglig på biblioteket';
+        let store = book.store;
+        if (result !== null && stringSimilarity.compareTwoStrings(result, book.title) >= 0.8) {
+          status = 'Tillgänglig för lån';
+          store = 'Jönköpings bibliotek';
         }
 
         let libBook = {
           'title': book.title,
           'status': status,
-          'store': book.store
+          'store': store
+        }
+
+        resolve(libBook);
+      }
+    });
+  });
+}
+
+const getVrydLibraryBook = function (book) {
+  return new Promise(function (resolve, reject) {
+    let url = properties.vrydLibraryUrl.replace("#####", book.title);
+    var options = {
+      url: url,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36'
+      }
+    };
+    request(options, function (err, response, body) {
+      if (err) {
+        console.err(" Something went wrong, couldn't parse parseBookInfo.")
+      } else {
+        let $ = cheerio.load(body);
+        let result = $('.product-list-item-link')
+          .children()
+          .first()
+          .text();
+
+        let status = book.status;
+        let store = book.store;
+        if (result !== null && stringSimilarity.compareTwoStrings(result, book.title) >= 0.8) {
+          status = 'Tillgänglig för lån';
+          store = 'Vaggeryds bibliotek';
+        }
+
+        let libBook = {
+          'title': book.title,
+          'status': status,
+          'store': store
         }
 
         resolve(libBook);
@@ -210,7 +255,7 @@ const addPoints = (stored, bookstore) => {
     bookstore.points += 5;
   }
 
-  if (stored.latestBookStatus === 'Tillgänglig på biblioteket') {
+  if (stored.latestBookStatus === 'Tillgänglig för lån') {
     bookstore.points -= 4;
   } else if (stored.latestBookStatus === 'I lager') {
     bookstore.points -= 3;
@@ -220,7 +265,7 @@ const addPoints = (stored, bookstore) => {
     bookstore.points -= 1;
   }
 
-  if (bookstore.status === 'Tillgänglig på biblioteket') {
+  if (bookstore.status === 'Tillgänglig för lån') {
     bookstore.points += 4;
   } else if (bookstore.status === 'I lager') {
     bookstore.points += 3;

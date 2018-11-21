@@ -27,6 +27,7 @@
     "minimist": "1.2.0",
     "npm": "^6.0.0",
     "promise": "7.1.1",
+    "querystring": "^0.2.0",
     "request": "2.79.0",
     "slack-node": "0.1.8",
     "string-similarity": "^1.2.0"
