@@ -16,17 +16,11 @@ const run = async function () {
     let bookList = await getBooksFile();
     let newBookList = await Promise.all(bookList.map(async (book) => {
 
-      let latestAdlibrisBook = await getLatestBookAdlibris(book);
-      addPoints(book, latestAdlibrisBook);
-      //console.log(latestAdlibrisBook);
-
       let latestBokusBook = await getLatestBookBokus(book);
       addPoints(book, latestBokusBook);
       //console.log(latestBokusBook);
 
-      let bestMatch = findBestMatch(latestAdlibrisBook, latestBokusBook);
-
-      let libraryBook = await getVrydLibraryBook(bestMatch);
+      let libraryBook = await getVrydLibraryBook(latestBokusBook);
       addPoints(book, libraryBook);
 
       libraryBook = await getJkpgLibraryBook(libraryBook);
@@ -84,48 +78,6 @@ const getLatestBookBokus = async function (book) {
   });
 }
 
-const getLatestBookAdlibris = function (book) {
-  return new Promise(function (resolve, reject) {
-    let url = properties.adlibrisUrl.replace("#####", book.author);
-    request(url, function (err, response, body) {
-      if (err) {
-        console.err(" Something went wrong, couldn't parse parseBookInfo.")
-      } else {
-        let $ = cheerio.load(body);
-        let books = [];
-        let first = $('.search-result__list-view__product__wrapper')
-          .children()
-          .first();
-        let title = first.find($('.search-result__product__name')).text().trim();
-        let iLagerStatus = first.find($('.element--desktop-only'))
-          .text()
-          .replace(/\s\s/g / '')
-          .trim();
-        let kommandeStatus = first.find($('span.processing-time'))
-          .clone()
-          .children()
-          .remove()
-          .end()
-          .text()
-          .trim();
-
-        let status = kommandeStatus;
-        if (status === '') {
-          status = iLagerStatus;
-        }
-
-        let book = {
-          'title': title,
-          'status': translateStatus(status),
-          'store': 'Adlibris'
-        }
-
-        resolve(book);
-      }
-    });
-  });
-}
-
 const getJkpgLibraryBook = function (book) {
   return new Promise(function (resolve, reject) {
     let url = properties.jkpgLibraryUrl.replace("#####", book.title);
@@ -138,7 +90,6 @@ const getJkpgLibraryBook = function (book) {
           .first()
           .html();
 
-        console.log('result', result);
         let status = book.status;
         let store = book.store;
         if (result !== null && stringSimilarity.compareTwoStrings(result, book.title) >= 0.8) {
@@ -273,14 +224,6 @@ const addPoints = (stored, bookstore) => {
     bookstore.points += 2;
   } else if (bookstore.status === 'Kommande') {
     bookstore.points += 1;
-  }
-}
-
-const findBestMatch = (adlibris, bokus) => {
-  if (adlibris.points > bokus.points) {
-    return adlibris;
-  } else {
-    return bokus;
   }
 }
 
