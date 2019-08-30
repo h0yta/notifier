@@ -1,7 +1,6 @@
 const program = require('commander');
 const stringSimilarity = require('string-similarity');
-const dateFormat = require('dateformat');
-const bookNotifier = require('./bookNotifier');
+const authorsNotifier = require('./authorNotifier');
 
 const init = function () {
   program
@@ -14,7 +13,7 @@ const init = function () {
     return;
   }
 
-  let matches = stringSimilarity.findBestMatch(program.action, ['books']);
+  let matches = stringSimilarity.findBestMatch(program.action, ['authors', 'books']);
   if (matches.bestMatch.rating === 1) {
     run(program.action);
   } else {
@@ -23,10 +22,11 @@ const init = function () {
   }
 }
 
-const run = function (notifierName) {
+const run = async function (notifierName) {
   switch (notifierName) {
     case 'books':
-      bookNotifier.run();
+    case 'authors':
+      await authorsNotifier.run();
       break;
   }
 }

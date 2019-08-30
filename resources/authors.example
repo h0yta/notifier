@@ -1,0 +1,40 @@
+[
+  {
+    "name": "Håkan Nesser",
+    "books": [
+      {
+        "title": "De vänsterhäntas förening",
+        "status": "TILLGANGLIG_FOR_KOP"
+      },
+      {
+        "title": "Halvmördaren : krönika över Adalbert Hanzon i nutid och dåtid författad av honom själv",
+        "status": "TILLGANGLIG_FOR_LAN",
+        "store": "Vaggeryds bibliotek"
+      }
+    ]
+  },
+  {
+    "name": "Peter Robinson",
+    "books": [
+      {
+        "title": "Skuggan av tvivel",
+        "status": "TILLGANGLIG_FOR_LAN",
+        "store": "Vaggeryds bibliotek"
+      },
+      {
+        "title": "En hängiven man",
+        "status": "TILLGANGLIG_FOR_KOP"
+      },
+      {
+        "title": "Oförsiktig kärlek",
+        "status": "TILLGANGLIG_FOR_LAN",
+        "store": "Vaggeryds bibliotek"
+      },
+      {
+        "title": "Förödande konsekvenser",
+        "status": "KOMMANDE",
+        "store": "Bokus"
+      }
+    ]
+  }
+]
