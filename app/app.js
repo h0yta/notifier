@@ -1,6 +1,6 @@
 const program = require('commander');
 const stringSimilarity = require('string-similarity');
-const authorsNotifier = require('./authorNotifier');
+const authorsNotifier = require('./AuthorNotifier');
 
 const init = function () {
   program
