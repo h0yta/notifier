@@ -73,20 +73,13 @@ const createBook = (title) => {
 }
 
 const addNewIfDontExist = (books, newBook) => {
-    let latestExists = false;
-    let newBooks = books.map(book => {
-        if (titleMatch(book.title, newBook.title)) {
-            latestExists = true;
-        }
+    let allreadyExists = books.filter(book => titleMatch(book.title, newBook.title)).length > 0;
 
-        return book;
-    });
-
-    if (!latestExists) {
-        newBooks.push(newBook);
+    if (!allreadyExists) {
+        books.push(newBook);
     }
 
-    return newBooks;
+    return books;
 }
 
 const authorExists = (authors, name) => {

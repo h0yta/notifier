@@ -17,7 +17,7 @@ const run = async () => {
       if (book.status === 'TILLGANGLIG_FOR_KOP') {
         let libraryBook = await elibService.getLibraryBook(book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
-          libraryBook._notify = "TILLGANGLIG_FOR_LAN";
+          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
           return libraryBook;
         }
       }
@@ -40,7 +40,7 @@ const addLatestIfDontExist = (books, latestBook) => {
       latestExists = true;
 
       if (statusExceed(book.status, latestBook.status)) {
-        latestBook._notify = "NY_STATUS";
+        latestBook._notify = 'NY_STATUS';
         return latestBook;
       }
     }
@@ -49,7 +49,7 @@ const addLatestIfDontExist = (books, latestBook) => {
   });
 
   if (!latestExists) {
-    latestBook._notify = "NY_BOK";
+    latestBook._notify = 'NY_BOK';
     newBooks.push(latestBook);
   }
 
@@ -103,7 +103,7 @@ const constructNotification = (author, book) => {
   } else if (book._notify === 'NY_STATUS') {
     message = 'Ny status för ' + book.title + ' av ' + author.name + '(' + book.status + ')';
   } else if (book._notify === 'TILLGANGLIG_FOR_LAN') {
-    message = book.title + ' av ' + author.name + 'är nu tillgänglig för lån på ' + book.store;
+    message = book.title + ' av ' + author.name + ' är nu tillgänglig för lån på ' + book.store;
   }
 
   return {

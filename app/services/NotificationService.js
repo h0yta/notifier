@@ -1,11 +1,16 @@
 const Slack = require('slack-node');
 let properties = require('../../resources/properties.json');
+let config = require('../../resources/config.json');
 
 const sendNotification = (notification) => {
-  if (properties.skipSlack) {
-    consoleLog(notification);
-  } else {
+
+  // Always print message to console.log
+  consoleLog(notification);
+
+  if (!properties.skipSlack) {
     sendSlackNotification(notification.slackMessage);
+  } else {
+    console.log('Slack is turned off');
   }
 }
 
@@ -14,7 +19,7 @@ const consoleLog = (notification) => {
 }
 
 const sendSlackNotification = (message) => {
-  slack = new Slack(properties.apiToken);
+  slack = new Slack(config.apiToken);
   slack.api('chat.postMessage', {
     text: message,
     channel: '#notifications'
