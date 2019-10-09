@@ -101,7 +101,7 @@ const constructNotification = (author, book) => {
   if (book._notify === 'NY_BOK') {
     message = 'Ny bok ' + book.title + ' av ' + author.name;
   } else if (book._notify === 'NY_STATUS') {
-    message = 'Ny status för ' + book.title + ' av ' + author.name + '(' + book.status + ')';
+    message = 'Ny status för ' + book.title + ' av ' + author.name + '(' + translateStatus(book.status) + ')';
   } else if (book._notify === 'TILLGANGLIG_FOR_LAN') {
     message = book.title + ' av ' + author.name + ' är nu tillgänglig för lån på ' + book.store;
   }
@@ -110,6 +110,18 @@ const constructNotification = (author, book) => {
     'slackMessage': message,
     'consoleMessage': message,
     'timestamp': dateFormat(new Date(), 'yyyy-mm-dd')
+  }
+}
+
+const translateStatus = (status) => {
+  if (status === 'TILLGANGLIG_FOR_LAN') {
+    return 'Tillgänglig för lån';
+  } else if (status === 'SLUTSALD') {
+    return 'Slutsåld';
+  } else if (status === 'TILLGANGLIG_FOR_KOP') {
+    return 'Tillgänglig för köp';
+  } else if (status === 'KOMMANDE') {
+    return 'Kommande';
   }
 }
 
