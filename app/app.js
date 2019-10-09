@@ -6,7 +6,7 @@ const authorNotifier = require('./AuthorNotifier');
 const init = async function () {
   program
     .version('0.1.1')
-    .option('-a --action <action>', 'Action: Books')
+    .option('-a --action <action>', 'Action: Books, Authors, Add')
     .option('-n --name <name>', 'Name: John Doe')
     .option('-t --title <title>', 'Title: The best book')
     .parse(process.argv);
