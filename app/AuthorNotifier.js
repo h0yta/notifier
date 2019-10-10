@@ -101,7 +101,7 @@ const constructNotification = (author, book) => {
   if (book._notify === 'NY_BOK') {
     message = 'Ny bok ' + book.title + ' av ' + author.name;
   } else if (book._notify === 'NY_STATUS') {
-    message = 'Ny status för ' + book.title + ' av ' + author.name + '(' + translateStatus(book.status) + ')';
+    message = 'Ny status för ' + book.title + ' av ' + author.name + ' (' + translateStatus(book.status) + ')';
   } else if (book._notify === 'TILLGANGLIG_FOR_LAN') {
     message = book.title + ' av ' + author.name + ' är nu tillgänglig för lån på ' + book.store;
   }
