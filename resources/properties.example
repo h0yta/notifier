@@ -1,5 +1,5 @@
 {
   "bokusUrl": "https://www.bokus.com/cgi-bin/product_search.cgi?search_word=#####&language=Svenska&binding_normalized=inbunden&rank_order=print_year_month_desc",
-  "vrydLibraryUrl": "https://vaggeryd.elib.se/Books/FreeTextSearch?searchInput=#####&bookType=e-book",
+  "elibLibraryUrl": "https://vaggeryd.elib.se/Books/FreeTextSearch?searchInput=#####&bookType=e-book",
   "skipSlack": true
 }

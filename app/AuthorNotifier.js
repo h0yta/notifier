@@ -1,6 +1,8 @@
 const fileService = require('./services/FileService');
 const bokusService = require('./services/BokusService');
-const elibService = require('./services/ElibService');
+const vrydService = require('./services/VrydService');
+const gbgService = require('./services/GbgService');
+const jkpgService = require('./services/JkpgService');
 const notificationService = require('./services/NotificationService');
 const dateFormat = require('dateformat');
 const stringSimilarity = require('string-similarity');
@@ -15,7 +17,19 @@ const run = async () => {
 
     let newBooks = await Promise.all(books.map(async (book) => {
       if (book.status === 'TILLGANGLIG_FOR_KOP') {
-        let libraryBook = await elibService.getLibraryBook(book.title);
+        let libraryBook = await vrydService.getLibraryBook(book.title);
+        if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
+          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
+          return libraryBook;
+        }
+
+        libraryBook = await gbgService.getLibraryBook(book.title);
+        if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
+          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
+          return libraryBook;
+        }
+
+        libraryBook = await jkpgService.getLibraryBook(book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
           return libraryBook;
