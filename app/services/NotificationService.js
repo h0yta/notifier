@@ -1,14 +1,14 @@
-const Slack = require('slack-node');
+const { WebClient } = require('@slack/web-api');
 let properties = require('../../resources/properties.json');
 let config = require('../../resources/config.json');
 
-const sendNotification = (notification) => {
+const sendNotification = async (notification) => {
 
   // Always print message to console.log
   consoleLog(notification);
 
   if (!properties.skipSlack) {
-    sendSlackNotification(notification.slackMessage);
+    await sendSlackNotification(notification.slackMessage);
   } else {
     console.log('Slack is turned off');
   }
@@ -18,15 +18,13 @@ const consoleLog = (notification) => {
   console.log(notification.timestamp, notification.consoleMessage);
 }
 
-const sendSlackNotification = (message) => {
-  slack = new Slack(config.apiToken);
-  slack.api('chat.postMessage', {
+const sendSlackNotification = async (message) => {
+  const web = new WebClient(config.apiKey);
+  await web.chat.postMessage({
+    channel: '#notifications',
     text: message,
-    channel: '#notifications'
-  }, function (err, response) {
-    if (err) {
-      console.log('Error sending slack message: ', response);
-    }
+  }).catch(err => {
+    console.log(err);
   });
 }
 

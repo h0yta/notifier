@@ -44,7 +44,7 @@ const run = async () => {
   }));
 
   await fileService.writeAuthors(newAuthors);
-  sendNotifications(newAuthors);
+  await sendNotifications(newAuthors);
 }
 
 const addLatestIfDontExist = (books, latestBook) => {
@@ -97,17 +97,18 @@ const calculateStatusScore = (status) => {
   }
 }
 
-const sendNotifications = (authors) => {
-  authors.forEach(author => {
-    let filtredBooks = author.books.filter(book => {
+const sendNotifications = async (authors) => {
+  let notifications = authors.flatMap(author => {
+    return author.books.filter(book => {
       return book._notify !== undefined
-    });
-
-    filtredBooks.forEach(book => {
-      let notification = constructNotification(author, book);
-      notificationService.notify(notification);
+    }).map(book => {
+      return constructNotification(author, book);;
     });
   });
+
+  await Promise.all(notifications.map(async notification => {
+    await notificationService.notify(notification);
+  }));
 }
 
 const constructNotification = (author, book) => {
