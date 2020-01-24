@@ -29,6 +29,10 @@ const getLatestBook = async function (author) {
           .replace(/\(.*\)/gi, '')
           .replace(/:.*/gi, '')
           .trim();
+
+        let link = first.find($('.Item__title--large a'))
+          .attr('href');
+
         let status = first.find($('.ProductList__status'))
           .text()
           .trim();
@@ -38,7 +42,8 @@ const getLatestBook = async function (author) {
         let book = {
           'title': title,
           'status': translateStatus(status),
-          'store': 'Bokus'
+          'store': 'Bokus',
+          'link': createBookUrl(url, link)
         }
 
         resolve(book);
@@ -46,7 +51,6 @@ const getLatestBook = async function (author) {
     });
   });
 }
-
 
 const translateStatus = (status) => {
   if (stringSimilarity.compareTwoStrings(status, 'Ännu ej utkommen') > 0.95) {
@@ -61,5 +65,10 @@ const translateStatus = (status) => {
   }
 }
 
+const createBookUrl = (searchUrl, bookUrl) => {
+  let regex = /^(https:\/\/[\w\.]+)\/.*$/;
+  let match = searchUrl.match(regex);
+  return match[1] + bookUrl;
+}
 
 module.exports.getLatestBook = getLatestBook;

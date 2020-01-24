@@ -43,6 +43,8 @@ const run = async () => {
     return author;
   }));
 
+  console.log(newAuthors);
+
   await fileService.writeAuthors(newAuthors);
   await sendNotifications(newAuthors);
 }
@@ -119,6 +121,10 @@ const constructNotification = (author, book) => {
     message = 'Ny status för ' + book.title + ' av ' + author.name + ' (' + translateStatus(book.status) + ')';
   } else if (book._notify === 'TILLGANGLIG_FOR_LAN') {
     message = book.title + ' av ' + author.name + ' är nu tillgänglig för lån på ' + book.store;
+  }
+
+  if (book.link) {
+    message += '\n' + book.link;
   }
 
   return {

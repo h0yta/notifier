@@ -19,6 +19,7 @@ const getLibraryBook = async (bookTitle) => {
       let result = $('.work-link')
         .first()
         .text()
+        // result may be null here, moves this inside null-check and make a static function.
         .replace(/\(.*\)/gi, '')
         .replace(/:.*/gi, '')
         .trim();
