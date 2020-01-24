@@ -43,8 +43,6 @@ const run = async () => {
     return author;
   }));
 
-  console.log(newAuthors);
-
   await fileService.writeAuthors(newAuthors);
   await sendNotifications(newAuthors);
 }
