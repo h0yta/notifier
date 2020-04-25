@@ -1,39 +1,23 @@
 [
   {
-    "name": "Håkan Nesser",
+    "name": "Hans Rosenfeldt",
     "books": [
       {
-        "title": "De vänsterhäntas förening",
-        "status": "TILLGANGLIG_FOR_KOP"
-      },
-      {
-        "title": "Halvmördaren : krönika över Adalbert Hanzon i nutid och dåtid författad av honom själv",
+        "title": "En högre rättvisa",
         "status": "TILLGANGLIG_FOR_LAN",
-        "store": "Vaggeryds bibliotek"
+        "store": "Jönköping bibliotek",
+        "link": "https://bibliotek.jonkoping.se/work/en-h%C3%B6gre-r%C3%A4ttvisa?id=ed52f023-7862-d7cb-a2ac-640ade796390&mediaTypeId=9bccd1a4-6323-4d0b-a8ce-a5d10108805b&queryId=1d707aba-91a5-4a51-acc6-ac625f897fe1&resultIndex=0"
       }
     ]
   },
   {
-    "name": "Peter Robinson",
+    "name": "Rolf Börjlind",
     "books": [
       {
-        "title": "Skuggan av tvivel",
-        "status": "TILLGANGLIG_FOR_LAN",
-        "store": "Vaggeryds bibliotek"
-      },
-      {
-        "title": "En hängiven man",
-        "status": "TILLGANGLIG_FOR_KOP"
-      },
-      {
-        "title": "Oförsiktig kärlek",
-        "status": "TILLGANGLIG_FOR_LAN",
-        "store": "Vaggeryds bibliotek"
-      },
-      {
-        "title": "Förödande konsekvenser",
+        "title": "Fruset guld",
         "status": "KOMMANDE",
-        "store": "Bokus"
+        "store": "Bokus",
+        "link": "https://www.bokus.com/bok/9789113098678/fruset-guld/"
       }
     ]
   }

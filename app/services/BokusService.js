@@ -16,9 +16,15 @@ const getLatestStatus = async function (author, book) {
 
 const getBookFromBokus = async function (author, title) {
   return new Promise(function (resolve, reject) {
-    let url = properties.bokusUrl
-      .replace("¤¤¤¤¤", author)
-      .replace("#####", title != undefined ? title : '');
+    let url = properties.bokusUrl;
+
+    if (author != undefined) {
+      url = url + '&authors=' + author;
+    }
+
+    if (title != undefined) {
+      url = url + '&search_word=' + title;
+    }
 
     request({
       'url': url,
