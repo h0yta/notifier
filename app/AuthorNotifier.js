@@ -23,19 +23,19 @@ const run = async () => {
           return bokusBook;
         }
       } else if (book.status === 'TILLGANGLIG_FOR_KOP') {
-        let libraryBook = await vrydService.getLibraryBook(book.title);
+        let libraryBook = await vrydService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
           return libraryBook;
         }
 
-        libraryBook = await gbgService.getLibraryBook(book.title);
+        libraryBook = await gbgService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
           return libraryBook;
         }
 
-        libraryBook = await jkpgService.getLibraryBook(book.title);
+        libraryBook = await jkpgService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
           return libraryBook;

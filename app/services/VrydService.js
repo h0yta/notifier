@@ -1,10 +1,11 @@
+const util = require('./ServiceUtil');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 let properties = require('../../resources/properties.json');
 
-const getLibraryBook = async (book) => {
-  let url = properties.vrydLibraryUrl.replace("#####", book);
+const getLibraryBook = async (author, book) => {
+  let url = properties.vrydLibraryUrl.replace("#####", util.concatAuthorAndBook(author, book));
 
   return puppeteer
     .launch()
@@ -27,8 +28,7 @@ const getLibraryBook = async (book) => {
 
       let link = $('.product-list-item-link')
         .first()
-        .attr('href')
-        .trim();
+        .attr('href');
 
       let status = 'EJ_TIILGANGLIG_FOR_LAN';
       let store = 'Vaggeryds bibliotek';
@@ -40,7 +40,7 @@ const getLibraryBook = async (book) => {
         'title': book,
         'status': status,
         'store': store,
-        'link': createBookUrl(url, link)
+        'link': util.createBookUrl(url, link)
       }
 
       return libBook;
@@ -48,12 +48,6 @@ const getLibraryBook = async (book) => {
       console.log(' Error in getLibraryBook in VrydService', err);
     });
 
-}
-
-const createBookUrl = (searchUrl, bookUrl) => {
-  let regex = /^(https:\/\/[\w\.]+)\/.*$/;
-  let match = searchUrl.match(regex);
-  return match[1] + bookUrl;
 }
 
 module.exports.getLibraryBook = getLibraryBook;

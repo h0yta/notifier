@@ -10,9 +10,9 @@ const bokus = require('./services/BokusService');
 const init = async () => {
   program
     .version('0.1.2')
-    .option('-a --action <action>', 'Action: Books, Authors, Add')
+    .option('-a --action <action>', '* Action: Books, Authors, Add')
+    .option('-t --title <book title>', '* Title: The best book')
     .option('-n --name <author name>', 'Name: John Doe')
-    .option('-t --title <book title>', 'Title: The best book')
     .parse(process.argv);
 
   if (!process.argv.slice(2).length) {
@@ -21,8 +21,16 @@ const init = async () => {
   }
 
   let exitCode = 0;
-  if (stringSimilarity.findBestMatch(program.action, ['authors', 'books', 'gbg', 'vryd', 'jkpg', 'bokus']).bestMatch.rating === 1) {
+  if (stringSimilarity.findBestMatch(program.action, ['authors', 'books', 'bokus']).bestMatch.rating === 1) {
     await runNotifier(program.action, program.title);
+  } else if (stringSimilarity.findBestMatch(program.action, ['gbg', 'vryd', 'jkpg']).bestMatch.rating === 1) {
+    if (!program.name) {
+      console.log('Missing -n <author name>');
+    } else if (!program.title) {
+      console.log('Missing -t <book title>');
+    }
+
+    await runNotifier(program.action, program.name, program.title);
   } else if (stringSimilarity.findBestMatch(program.action, ['add']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');
@@ -40,22 +48,22 @@ const init = async () => {
   process.exit(exitCode);
 }
 
-const runNotifier = async function (notifierName, title) {
+const runNotifier = async function (notifierName, title, name) {
   switch (notifierName) {
     case 'books':
     case 'authors':
       await authorNotifier.run();
       break;
     case 'gbg':
-      let gbgBook = await gbg.getLibraryBook(title);
+      let gbgBook = await gbg.getLibraryBook(name, title);
       console.log(gbgBook);
       break;
     case 'vryd':
-      let vrydBook = await vryd.getLibraryBook(title);
+      let vrydBook = await vryd.getLibraryBook(name, title);
       console.log(vrydBook);
       break;
     case 'jkpg':
-      let jkpgBook = await jkpg.getLibraryBook(title);
+      let jkpgBook = await jkpg.getLibraryBook(name, title);
       console.log(jkpgBook);
       break;
     case 'bokus':

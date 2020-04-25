@@ -1,3 +1,4 @@
+const util = require('./ServiceUtil');
 const request = require('request');
 const iconv = require('iconv-lite');
 const cheerio = require('cheerio');
@@ -6,16 +7,16 @@ const stringSimilarity = require('string-similarity');
 let properties = require('../../resources/properties.json');
 
 const getLatestBook = async function (author) {
-  return getBookFromBokus(author, undefined);
+  return await getBookFromBokus(author, undefined);
 }
 
-const getLatestStatus = async function (author) {
-  return getBookFromBokus(author, book);
+const getLatestStatus = async function (author, book) {
+  return await getBookFromBokus(author, book);
 }
 
 const getBookFromBokus = async function (author, book) {
   return new Promise(function (resolve, reject) {
-    let url = properties.bokusUrl.replace("#####", concatAuthorAndBook(author, book));
+    let url = properties.bokusUrl.replace("#####", util.concatAuthorAndBook(author, book));
     request({
       'url': url,
       'encoding': null
@@ -51,17 +52,13 @@ const getBookFromBokus = async function (author, book) {
           'title': title,
           'status': translateStatus(status),
           'store': 'Bokus',
-          'link': createBookUrl(url, link)
+          'link': util.createBookUrl(url, link)
         }
 
         resolve(book);
       }
     });
   });
-}
-
-const concatAuthorAndBook = (author, book) => {
-  return ((author != undefined ? author : '') + ' ' + (book != undefined ? book : '')).trim();
 }
 
 const translateStatus = (status) => {
@@ -75,12 +72,6 @@ const translateStatus = (status) => {
   } else {
     return 'TILLGANGLIG_FOR_KOP';
   }
-}
-
-const createBookUrl = (searchUrl, bookUrl) => {
-  let regex = /^(https:\/\/[\w\.]+)\/.*$/;
-  let match = searchUrl.match(regex);
-  return match[1] + bookUrl;
 }
 
 module.exports.getLatestBook = getLatestBook;

@@ -1,10 +1,11 @@
+const util = require('./ServiceUtil');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 let properties = require('../../resources/properties.json');
 
-const getLibraryBook = async (bookTitle) => {
-  let url = properties.jkpgLibraryUrl.replace("#####", bookTitle);
+const getLibraryBook = async (author, book) => {
+  let url = properties.jkpgLibraryUrl.replace("#####", util.concatAuthorAndBook(author, book));
 
   return puppeteer
     .launch()
@@ -28,19 +29,17 @@ const getLibraryBook = async (bookTitle) => {
         .first()
         .attr('href');
 
-      console.log(result, link);
-
       let status = 'EJ_TIILGANGLIG_FOR_LAN';
       let store = 'Jönköping bibliotek';
-      if (result !== null && stringSimilarity.compareTwoStrings(result, bookTitle) >= 0.8) {
+      if (result !== null && stringSimilarity.compareTwoStrings(result, book) >= 0.8) {
         status = 'TILLGANGLIG_FOR_LAN';
       }
 
       let libBook = {
-        'title': bookTitle,
+        'title': book,
         'status': status,
         'store': store,
-        'link': createBookUrl(url, link)
+        'link': util.createBookUrl(url, link)
       }
 
       return libBook;
@@ -48,12 +47,6 @@ const getLibraryBook = async (bookTitle) => {
       console.log(' Error in getLibraryBook in JkpgService', err);
     });
 
-}
-
-const createBookUrl = (searchUrl, bookUrl) => {
-  let regex = /^(https:\/\/[\w\.]+)\/.*$/;
-  let match = searchUrl.match(regex);
-  return match[1] + bookUrl;
 }
 
 module.exports.getLibraryBook = getLibraryBook;
