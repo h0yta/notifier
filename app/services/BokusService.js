@@ -14,9 +14,12 @@ const getLatestStatus = async function (author, book) {
   return await getBookFromBokus(author, book);
 }
 
-const getBookFromBokus = async function (author, book) {
+const getBookFromBokus = async function (author, title) {
   return new Promise(function (resolve, reject) {
-    let url = properties.bokusUrl.replace("#####", util.concatAuthorAndBook(author, book));
+    let url = properties.bokusUrl
+      .replace("¤¤¤¤¤", author)
+      .replace("#####", title != undefined ? title : '');
+
     request({
       'url': url,
       'encoding': null
@@ -25,20 +28,29 @@ const getBookFromBokus = async function (author, book) {
         console.log(' Error in getLatestBookBokus', err);
         reject(err);
       } else {
+        let book = {
+          'title': title,
+          'store': 'Bokus'
+        };
+
         iconv.skipDecodeWarning = true;
         let decodedBody = iconv.decode(body, 'windows-1252');
 
         let $ = cheerio.load(decodedBody);
         $('.ProductList__item').each((i, elm) => {
 
-          let foundAuthor = $(elm).find($('.ProductList__authors a'))
+          let foundAuthors = $(elm).find($('.ProductList__authors'))
             .text()
             .replace(/\(.*\)/gi, '')
             .replace(/:.*/gi, '')
-            .trim();
+            .replace("av", "")
+            .trim()
+            .split(' Och ')
+            .join(',')
+            .split(',');
 
-          if (stringSimilarity.compareTwoStrings(author, foundAuthor) >= 0.8) {
-            let title = $(elm).find($('.Item__title--large'))
+          if (matchesAny(foundAuthors, author)) {
+            let foundTitle = $(elm).find($('.Item__title--large'))
               .text()
               .replace(/\(.*\)/gi, '')
               .replace(/:.*/gi, '')
@@ -53,20 +65,27 @@ const getBookFromBokus = async function (author, book) {
 
             //console.log('Bokus status: ', status);
 
-            let book = {
-              'title': title,
+            book = {
+              'title': foundTitle,
               'status': translateStatus(status),
               'store': 'Bokus',
               'link': util.createBookUrl(url, link)
             }
 
-            resolve(book);
             return false;
           };
         });
+
+        resolve(book);
+        return;
+
       }
     });
   });
+}
+
+const matchesAny = (authorArray, author) => {
+  return authorArray.filter(a => stringSimilarity.compareTwoStrings(author, a) >= 0.8).length > 0;
 }
 
 const translateStatus = (status) => {

@@ -56,7 +56,7 @@ const run = async () => {
 const addLatestIfDontExist = (books, latestBook) => {
   let latestExists = false;
   let newBooks = books.map(book => {
-    if (titleMatch(book.title, latestBook.title)) {
+    if (latestBook.title && titleMatch(book.title, latestBook.title)) {
       latestExists = true;
 
       if (statusExceed(book.status, latestBook.status)) {
@@ -68,7 +68,7 @@ const addLatestIfDontExist = (books, latestBook) => {
     return book;
   });
 
-  if (!latestExists) {
+  if (latestBook.title && !latestExists) {
     latestBook._notify = 'NY_BOK';
     newBooks.push(latestBook);
   }
