@@ -16,7 +16,13 @@ const run = async () => {
     let books = addLatestIfDontExist(author.books, latestBook);
 
     let newBooks = await Promise.all(books.map(async (book) => {
-      if (book.status === 'TILLGANGLIG_FOR_KOP') {
+      if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
+        let bokusBook = await bokusService.getLatestStatus(author.name, book.title);
+        if (bokusBook.status === 'TILLGANGLIG_FOR_KOP') {
+          bokusBook._notify = 'NY_STATUS';
+          return bokusBook;
+        }
+      } else if (book.status === 'TILLGANGLIG_FOR_KOP') {
         let libraryBook = await vrydService.getLibraryBook(book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';

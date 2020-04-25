@@ -24,6 +24,12 @@ const getLibraryBook = async (bookTitle) => {
         .replace(/:.*/gi, '')
         .trim();
 
+      let link = $('.work-link')
+        .first()
+        .attr('href');
+
+      console.log(result, link);
+
       let status = 'EJ_TIILGANGLIG_FOR_LAN';
       let store = 'Jönköping bibliotek';
       if (result !== null && stringSimilarity.compareTwoStrings(result, bookTitle) >= 0.8) {
@@ -33,7 +39,8 @@ const getLibraryBook = async (bookTitle) => {
       let libBook = {
         'title': bookTitle,
         'status': status,
-        'store': store
+        'store': store,
+        'link': createBookUrl(url, link)
       }
 
       return libBook;
@@ -41,6 +48,12 @@ const getLibraryBook = async (bookTitle) => {
       console.log(' Error in getLibraryBook in JkpgService', err);
     });
 
+}
+
+const createBookUrl = (searchUrl, bookUrl) => {
+  let regex = /^(https:\/\/[\w\.]+)\/.*$/;
+  let match = searchUrl.match(regex);
+  return match[1] + bookUrl;
 }
 
 module.exports.getLibraryBook = getLibraryBook;

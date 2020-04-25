@@ -6,8 +6,16 @@ const stringSimilarity = require('string-similarity');
 let properties = require('../../resources/properties.json');
 
 const getLatestBook = async function (author) {
+  return getBookFromBokus(author, undefined);
+}
+
+const getLatestStatus = async function (author) {
+  return getBookFromBokus(author, book);
+}
+
+const getBookFromBokus = async function (author, book) {
   return new Promise(function (resolve, reject) {
-    let url = properties.bokusUrl.replace("#####", author);
+    let url = properties.bokusUrl.replace("#####", concatAuthorAndBook(author, book));
     request({
       'url': url,
       'encoding': null
@@ -52,6 +60,10 @@ const getLatestBook = async function (author) {
   });
 }
 
+const concatAuthorAndBook = (author, book) => {
+  return ((author != undefined ? author : '') + ' ' + (book != undefined ? book : '')).trim();
+}
+
 const translateStatus = (status) => {
   if (stringSimilarity.compareTwoStrings(status, 'Ännu ej utkommen') > 0.95) {
     return 'KOMMANDE';
@@ -72,3 +84,4 @@ const createBookUrl = (searchUrl, bookUrl) => {
 }
 
 module.exports.getLatestBook = getLatestBook;
+module.exports.getLatestStatus = getLatestStatus;

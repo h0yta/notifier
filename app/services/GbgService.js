@@ -25,6 +25,11 @@ const getLibraryBook = async (bookTitle) => {
         .replace(/:.*/gi, '')
         .trim();
 
+      let link = $('.title-name a')
+        .attr('href');
+
+      console.log(link);
+
       let status = 'EJ_TIILGANGLIG_FOR_LAN';
       let store = 'Göteborgs bibliotek';
       if (result !== null && stringSimilarity.compareTwoStrings(result, bookTitle) >= 0.8) {
@@ -34,7 +39,8 @@ const getLibraryBook = async (bookTitle) => {
       let libBook = {
         'title': bookTitle,
         'status': status,
-        'store': store
+        'store': store,
+        'link': createBookUrl(url, link)
       }
 
       return libBook;
@@ -42,6 +48,12 @@ const getLibraryBook = async (bookTitle) => {
       console.log(' Error in getLibraryBook in GbgService', err);
     });
 
+}
+
+const createBookUrl = (searchUrl, bookUrl) => {
+  let regex = /^(https:\/\/[\w\.]+)\/.*$/;
+  let match = searchUrl.match(regex);
+  return match[1] + bookUrl;
 }
 
 module.exports.getLibraryBook = getLibraryBook;
