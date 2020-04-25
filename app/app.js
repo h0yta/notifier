@@ -30,7 +30,7 @@ const init = async () => {
       console.log('Missing -t <book title>');
     }
 
-    await runNotifier(program.action, program.name, program.title);
+    await runNotifier(program.action, program.title, program.name);
   } else if (stringSimilarity.findBestMatch(program.action, ['add']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');

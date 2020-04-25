@@ -29,33 +29,41 @@ const getBookFromBokus = async function (author, book) {
         let decodedBody = iconv.decode(body, 'windows-1252');
 
         let $ = cheerio.load(decodedBody);
-        let first = $('.ProductList__item')
-          .children()
-          .first();
+        $('.ProductList__item').each((i, elm) => {
 
-        let title = first.find($('.Item__title--large'))
-          .text()
-          .replace(/\(.*\)/gi, '')
-          .replace(/:.*/gi, '')
-          .trim();
+          let foundAuthor = $(elm).find($('.ProductList__authors a'))
+            .text()
+            .replace(/\(.*\)/gi, '')
+            .replace(/:.*/gi, '')
+            .trim();
 
-        let link = first.find($('.Item__title--large a'))
-          .attr('href');
+          if (stringSimilarity.compareTwoStrings(author, foundAuthor) >= 0.8) {
+            let title = $(elm).find($('.Item__title--large'))
+              .text()
+              .replace(/\(.*\)/gi, '')
+              .replace(/:.*/gi, '')
+              .trim();
 
-        let status = first.find($('.ProductList__status'))
-          .text()
-          .trim();
+            let link = $(elm).find($('.Item__title--large a'))
+              .attr('href');
 
-        //console.log('Bokus status: ', status);
+            let status = $(elm).find($('.ProductList__status'))
+              .text()
+              .trim();
 
-        let book = {
-          'title': title,
-          'status': translateStatus(status),
-          'store': 'Bokus',
-          'link': util.createBookUrl(url, link)
-        }
+            //console.log('Bokus status: ', status);
 
-        resolve(book);
+            let book = {
+              'title': title,
+              'status': translateStatus(status),
+              'store': 'Bokus',
+              'link': util.createBookUrl(url, link)
+            }
+
+            resolve(book);
+            return false;
+          };
+        });
       }
     });
   });

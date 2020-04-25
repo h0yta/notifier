@@ -30,6 +30,12 @@ const getLibraryBook = async (author, book) => {
         .first()
         .attr('href');
 
+      console.log(result);
+      console.log(link);
+      console.log(book);
+      console.log(stringSimilarity.compareTwoStrings(result, book));
+
+
       let status = 'EJ_TIILGANGLIG_FOR_LAN';
       let store = 'Vaggeryds bibliotek';
       if (result !== null && stringSimilarity.compareTwoStrings(result, book) >= 0.8) {
