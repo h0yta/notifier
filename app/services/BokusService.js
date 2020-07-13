@@ -60,6 +60,7 @@ const getBookFromBokus = async function (author, title) {
               .text()
               .replace(/\(.*\)/gi, '')
               .replace(/:.*/gi, '')
+              .replace(/-.*/gi, '')
               .trim();
 
             let link = $(elm).find($('.Item__title--large a'))
