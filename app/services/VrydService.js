@@ -7,8 +7,6 @@ let properties = require('../../resources/properties.json');
 const getLibraryBook = async (author, book) => {
   let url = properties.vrydLibraryUrl.replace("#####", book);
 
-  console.log('url -> ', url);
-
   return puppeteer
     .launch()
     .then((browser) => {
