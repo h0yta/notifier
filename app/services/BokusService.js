@@ -6,26 +6,34 @@ const Promise = require('promise');
 const stringSimilarity = require('string-similarity');
 let properties = require('../../resources/properties.json');
 
-const getLatestBook = async function (author) {
-  return await getBookFromBokus(author, undefined);
+const getLatestBook = async function (author, keyword) {
+  let url = createUrl(properties.bokusUrl, author, keyword, undefined);
+  return await getBookFromBokus(url, author, keyword, undefined);
 }
 
-const getLatestStatus = async function (author, book) {
-  return await getBookFromBokus(author, book);
+const getLatestStatus = async function (author, keyword, book) {
+  let url = createUrl(properties.bokusUrl, author, keyword, book);
+  return await getBookFromBokus(url, author, keyword, book);
 }
 
-const getBookFromBokus = async function (author, title) {
+const createUrl = (baseUrl, author, keyword, title) => {
+  let url = baseUrl;
+
+  if (title != undefined && author != undefined) {
+    url = url + '&search_word=' + author + ' ' + title;
+  } if (title != undefined && keyword != undefined) {
+    url = url + '&search_word=' + keyword + ' ' + title;
+  } else if (keyword != undefined) {
+    url = url + '&search_word=' + keyword;
+  } else if (author != undefined) {
+    url = url + '&authors=' + author;
+  }
+
+  return url;
+}
+
+const getBookFromBokus = async function (url, author, keyword, title) {
   return new Promise(function (resolve, reject) {
-    let url = properties.bokusUrl;
-
-    if (author != undefined) {
-      url = url + '&authors=' + author;
-    }
-
-    if (title != undefined) {
-      url = url + '&search_word=' + title;
-    }
-
     request({
       'url': url,
       'encoding': null
@@ -55,7 +63,10 @@ const getBookFromBokus = async function (author, title) {
             .join(',')
             .split(',');
 
-          if (matchesAny(foundAuthors, author)) {
+          let foundFormat = $(elm).find($('.Item__format'))
+            .text();
+
+          if (matchesAny(foundAuthors, author) && matchesFormats(foundFormat)) {
             let foundTitle = $(elm).find($('.Item__title--large'))
               .text()
               .replace(/\(.*\)/gi, '')
@@ -70,7 +81,7 @@ const getBookFromBokus = async function (author, title) {
               .text()
               .trim();
 
-            //console.log('Bokus status: ', status);
+            console.log('Bokus title: ', foundTitle);
 
             book = {
               'title': foundTitle,
@@ -93,6 +104,10 @@ const getBookFromBokus = async function (author, title) {
 
 const matchesAny = (authorArray, author) => {
   return authorArray.filter(a => stringSimilarity.compareTwoStrings(author, a) >= 0.8).length > 0;
+}
+
+const matchesFormats = (format) => {
+  return format.toUpperCase() === 'INBUNDEN' || format.toUpperCase() === 'KARTONNAGE';
 }
 
 const translateStatus = (status) => {

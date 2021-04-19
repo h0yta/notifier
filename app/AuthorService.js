@@ -3,8 +3,8 @@ const notificationService = require('./services/NotificationService');
 const dateFormat = require('dateformat');
 const stringSimilarity = require('string-similarity');
 
-const run = async (name, title) => {
-  let authors = await fileService.readAuthors();
+const run = async (authorList, name, title) => {
+  let authors = await fileService.readAuthors(authorList);
   if (authorExists(authors, name)) {
     let newAuthors = authors.map(author => {
       if (authorMatch(author.name, name)) {
@@ -15,7 +15,7 @@ const run = async (name, title) => {
 
       return author;
     });
-    await fileService.writeAuthors(newAuthors);
+    await fileService.writeAuthors(authorList, newAuthors);
     sendNotifications(newAuthors);
   } else {
     let newAuthor = createAuthor(name);
@@ -23,7 +23,7 @@ const run = async (name, title) => {
       newAuthor.books.push(createBook(title));
     }
     authors.push(newAuthor);
-    await fileService.writeAuthors(authors);
+    await fileService.writeAuthors(authorList, authors);
     sendNotifications(authors);
   }
 

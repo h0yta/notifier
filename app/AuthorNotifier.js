@@ -7,17 +7,17 @@ const notificationService = require('./services/NotificationService');
 const dateFormat = require('dateformat');
 const stringSimilarity = require('string-similarity');
 
-const run = async () => {
-  let authors = await fileService.readAuthors();
+const run = async (authorList) => {
+  let authors = await fileService.readAuthors(authorList);
 
   let newAuthors = await Promise.all(authors.map(async (author) => {
-    let latestBook = await bokusService.getLatestBook(author.name);
-
+    let latestBook = await bokusService.getLatestBook(author.name, author.keyword);
     let books = addLatestIfDontExist(author.books, latestBook);
 
     let newBooks = await Promise.all(books.map(async (book) => {
       if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
         let bokusBook = await bokusService.getLatestStatus(author.name, book.title);
+
         if (bokusBook.status === 'TILLGANGLIG_FOR_KOP') {
           bokusBook._notify = 'NY_STATUS';
           return bokusBook;
@@ -49,7 +49,7 @@ const run = async () => {
     return author;
   }));
 
-  await fileService.writeAuthors(newAuthors);
+  await fileService.writeAuthors(authorList, newAuthors);
   await sendNotifications(newAuthors);
 }
 
