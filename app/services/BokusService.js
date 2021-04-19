@@ -81,8 +81,6 @@ const getBookFromBokus = async function (url, author, keyword, title) {
               .text()
               .trim();
 
-            console.log('Bokus title: ', foundTitle);
-
             book = {
               'title': foundTitle,
               'status': translateStatus(status),
