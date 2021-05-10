@@ -25,7 +25,7 @@ const init = async () => {
   let exitCode = 0;
   let list = getAuthorList(program.list);
   if (stringSimilarity.findBestMatch(program.action, ['authors', 'books', 'bokus']).bestMatch.rating === 1) {
-    await runNotifier(list, program.action, program.title);
+    await runNotifier(list, program.action, undefined, program.name);
   } else if (stringSimilarity.findBestMatch(program.action, ['gbg', 'vryd', 'jkpg']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');
@@ -70,7 +70,10 @@ const runNotifier = async function (authorList, notifierName, title, name) {
       console.log(jkpgBook);
       break;
     case 'bokus':
-      let bokusBook = await bokus.getLatestBook(title);
+      let author = {
+        'name': name
+      }
+      let bokusBook = await bokus.getLatestBook(author);
       console.log(bokusBook);
       break;
   }

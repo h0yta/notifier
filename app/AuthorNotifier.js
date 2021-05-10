@@ -11,12 +11,12 @@ const run = async (authorList) => {
   let authors = await fileService.readAuthors(authorList);
 
   let newAuthors = await Promise.all(authors.map(async (author) => {
-    let latestBook = await bokusService.getLatestBook(author.name, author.keyword);
+    let latestBook = await bokusService.getLatestBook(author);
     let books = addLatestIfDontExist(author.books, latestBook);
 
     let newBooks = await Promise.all(books.map(async (book) => {
       if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
-        let bokusBook = await bokusService.getLatestStatus(author.name, book.title);
+        let bokusBook = await bokusService.getLatestStatus(author);
 
         if (bokusBook.status === 'TILLGANGLIG_FOR_KOP') {
           bokusBook._notify = 'NY_STATUS';

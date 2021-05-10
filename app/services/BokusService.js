@@ -6,33 +6,33 @@ const Promise = require('promise');
 const stringSimilarity = require('string-similarity');
 let properties = require('../../resources/properties.json');
 
-const getLatestBook = async function (author, keyword) {
-  let url = createUrl(properties.bokusUrl, author, keyword, undefined);
-  return await getBookFromBokus(url, author, keyword, undefined);
+const getLatestBook = async function (author) {
+  let url = createUrl(properties.bokusUrl, author, undefined);
+  return await getBookFromBokus(url, author, undefined);
 }
 
-const getLatestStatus = async function (author, keyword, book) {
-  let url = createUrl(properties.bokusUrl, author, keyword, book);
-  return await getBookFromBokus(url, author, keyword, book);
+const getLatestStatus = async function (author, book) {
+  let url = createUrl(properties.bokusUrl, author, book);
+  return await getBookFromBokus(url, author, book);
 }
 
-const createUrl = (baseUrl, author, keyword, title) => {
+const createUrl = (baseUrl, author, title) => {
   let url = baseUrl;
 
-  if (title != undefined && author != undefined) {
-    url = url + '&search_word=' + author + ' ' + title;
-  } if (title != undefined && keyword != undefined) {
-    url = url + '&search_word=' + keyword + ' ' + title;
-  } else if (keyword != undefined) {
-    url = url + '&search_word=' + keyword;
-  } else if (author != undefined) {
-    url = url + '&authors=' + author;
+  if (title != undefined && author.name != undefined) {
+    url = url + '&search_word=' + author.name + ' ' + title;
+  } if (title != undefined && author.keyword != undefined) {
+    url = url + '&search_word=' + author.keyword + ' ' + title;
+  } else if (author.keyword != undefined) {
+    url = url + '&search_word=' + author.keyword;
+  } else if (author.name != undefined) {
+    url = url + '&authors=' + author.name;
   }
 
   return url;
 }
 
-const getBookFromBokus = async function (url, author, keyword, title) {
+const getBookFromBokus = async function (url, author, title) {
   return new Promise(function (resolve, reject) {
     request({
       'url': url,
@@ -66,12 +66,12 @@ const getBookFromBokus = async function (url, author, keyword, title) {
           let foundFormat = $(elm).find($('.Item__format'))
             .text();
 
-          if (matchesAny(foundAuthors, author) && matchesFormats(foundFormat)) {
+          if (matchesAny(foundAuthors, author.name) && matchesFormats(foundFormat)) {
             let foundTitle = $(elm).find($('.Item__title--large'))
               .text()
               .replace(/\(.*\)/gi, '')
-              .replace(/:.*/gi, '')
-              .replace(/-.*/gi, '')
+              .replace(/:/gi, '')
+              .replace(/-/gi, '')
               .trim();
 
             let link = $(elm).find($('.Item__title--large a'))
@@ -81,11 +81,16 @@ const getBookFromBokus = async function (url, author, keyword, title) {
               .text()
               .trim();
 
+            let releaseDate = $(elm).find($('.Item__edition'))
+              .text()
+              .trim();
+
             book = {
-              'title': foundTitle,
+              'title': translateTitle(foundTitle, author),
               'status': translateStatus(status),
               'store': 'Bokus',
-              'link': util.createBookUrl(url, link)
+              'link': util.createBookUrl(url, link),
+              'release': parseDate(releaseDate)
             }
 
             return false;
@@ -100,12 +105,35 @@ const getBookFromBokus = async function (url, author, keyword, title) {
   });
 }
 
-const matchesAny = (authorArray, author) => {
-  return authorArray.filter(a => stringSimilarity.compareTwoStrings(author, a) >= 0.8).length > 0;
+const matchesAny = (authorArray, authorName) => {
+  return authorArray.filter(a => stringSimilarity.compareTwoStrings(authorName, a) >= 0.8).length > 0;
 }
 
 const matchesFormats = (format) => {
   return format.toUpperCase() === 'INBUNDEN' || format.toUpperCase() === 'KARTONNAGE';
+}
+
+const translateTitle = (title, author) => {
+  if (author.excludeKeyword) {
+    return capitalizeFirstLetter(title.toLowerCase().replace(author.keyword.toLowerCase(), "").trim());
+  }
+
+  return title;
+}
+
+const parseDate = (dateString) => {
+  // 2021-07-26
+  let ruleRegexp = /^.*(\d\d\d\d-\d\d-\d\d)/;
+  let match = ruleRegexp.exec(dateString);
+  if (match === null) {
+    console.log('Found no match for', dateString);
+  } else {
+    return match[1].trim();
+  }
+}
+
+function capitalizeFirstLetter(string) {
+  return string.replace(/^./, string[0].toUpperCase());
 }
 
 const translateStatus = (status) => {
