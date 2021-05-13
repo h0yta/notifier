@@ -9,7 +9,6 @@ const stringSimilarity = require('string-similarity');
 
 const run = async (authorList) => {
   let authors = await fileService.readAuthors(authorList);
-  console.log(authors);
   let newAuthors = await Promise.all(authors.map(async (author) => {
     let latestBook = await bokusService.getLatestBook(author);
     let books = addLatestIfDontExist(author.books, latestBook);
