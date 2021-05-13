@@ -1,11 +1,12 @@
 const fs = require('fs');
 
 const readAuthors = async (filename) => {
-  return await read(filename);
+  let authors = await read(filename);
+  return authors.authors;
 }
 
 const read = async (filename) => {
-  let data = fs.readFileSync(__dirname + '/' + filename, 'utf8');
+  let data = fs.readFileSync(filename, 'utf8');
   return JSON.parse(data);
 }
 
@@ -14,7 +15,11 @@ const writeAuthors = async (filename, authors) => {
 }
 
 const write = async (filename, authors) => {
-  fs.writeFileSync(__dirname + '/' + filename, JSON.stringify(authors, propertyReplacer, 2));
+  let authorsFile = {
+    "authors": authors,
+    "updated": new Date()
+  }
+  fs.writeFileSync(filename, JSON.stringify(authorsFile, propertyReplacer, 2));
 }
 
 const propertyReplacer = (key, value) => {
