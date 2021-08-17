@@ -12,9 +12,9 @@ const getLatestBook = async function (author) {
   return await getBookFromBokus(url, author, undefined);
 }
 
-const getLatestStatus = async function (author, book) {
-  let url = createUrl(bokusUrl, author, book);
-  return await getBookFromBokus(url, author, book);
+const getLatestStatus = async function (author, title) {
+  let url = createUrl(bokusUrl, author, title);
+  return await getBookFromBokus(url, author, title);
 }
 
 const createUrl = (baseUrl, author, title) => {

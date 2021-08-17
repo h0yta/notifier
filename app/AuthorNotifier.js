@@ -16,7 +16,7 @@ const run = async (authorList) => {
 
     let newBooks = await Promise.all(books.map(async (book) => {
       if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
-        let bokusBook = await bokusService.getLatestStatus(author, book);
+        let bokusBook = await bokusService.getLatestStatus(author, book.title);
 
         if (bokusBook.status === 'TILLGANGLIG_FOR_KOP') {
           bokusBook._notify = 'NY_STATUS';
