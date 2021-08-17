@@ -51,8 +51,8 @@ const init = async () => {
     } else if (!program.title) {
       console.log('Missing -t <book title>');
     }
-
-    await runService(null, program.name, program.title);
+    let list = getAuthorList(program.list);
+    await runService(list, program.name, program.title);
   } else {
     console.log(' \'' + program.action + '\' is not a valid action. See --help');
     console.log(' Did you mean \t\'' + matches.bestMatch.target + '\'');
