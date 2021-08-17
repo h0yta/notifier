@@ -2,9 +2,12 @@ const program = require('commander');
 const stringSimilarity = require('string-similarity');
 const authorService = require('./AuthorService');
 const authorNotifier = require('./AuthorNotifier');
+const libraryService = require('./LibraryService');
 const gbg = require('./services/GbgService');
 const vryd = require('./services/VrydService');
 const jkpg = require('./services/JkpgService');
+const habo = require('./services/HaboService');
+const lund = require('./services/LundService');
 const bokus = require('./services/BokusService');
 let properties = require('../resources/properties.json');
 
@@ -23,17 +26,25 @@ const init = async () => {
   }
 
   let exitCode = 0;
-  let list = getAuthorList(program.list);
   if (stringSimilarity.findBestMatch(program.action, ['authors', 'books', 'bokus']).bestMatch.rating === 1) {
+    let list = getAuthorList(program.list);
     await runNotifier(list, program.action, undefined, program.name);
-  } else if (stringSimilarity.findBestMatch(program.action, ['gbg', 'vryd', 'jkpg']).bestMatch.rating === 1) {
+  } else if (stringSimilarity.findBestMatch(program.action, ['gbg', 'vryd', 'jkpg', 'habo', 'lund ']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');
     } else if (!program.title) {
       console.log('Missing -t <book title>');
     }
 
-    await runNotifier(list, program.action, program.title, program.name);
+    await runNotifier(null, program.action, program.title, program.name);
+  } else if (stringSimilarity.findBestMatch(program.action, ['lib']).bestMatch.rating === 1) {
+    if (!program.name) {
+      console.log('Missing -n <author name>');
+    } else if (!program.title) {
+      console.log('Missing -t <book title>');
+    }
+
+    await runNotifier(null, program.action, program.title, program.name);
   } else if (stringSimilarity.findBestMatch(program.action, ['add']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');
@@ -41,7 +52,7 @@ const init = async () => {
       console.log('Missing -t <book title>');
     }
 
-    await runService(list, program.name, program.title);
+    await runService(null, program.name, program.title);
   } else {
     console.log(' \'' + program.action + '\' is not a valid action. See --help');
     console.log(' Did you mean \t\'' + matches.bestMatch.target + '\'');
@@ -57,6 +68,9 @@ const runNotifier = async function (authorList, notifierName, title, name) {
     case 'authors':
       await authorNotifier.run(authorList);
       break;
+    case 'lib':
+      await libraryService.run(name, title);
+      break;
     case 'gbg':
       let gbgBook = await gbg.getLibraryBook(name, title);
       console.log(gbgBook);
@@ -68,6 +82,14 @@ const runNotifier = async function (authorList, notifierName, title, name) {
     case 'jkpg':
       let jkpgBook = await jkpg.getLibraryBook(name, title);
       console.log(jkpgBook);
+      break;
+    case 'habo':
+      let haboBook = await habo.getLibraryBook(name, title);
+      console.log(haboBook);
+      break;
+    case 'lund':
+      let lundBook = await lund.getLibraryBook(name, title);
+      console.log(lundBook);
       break;
     case 'bokus':
       let author = {

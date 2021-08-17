@@ -4,15 +4,16 @@ const iconv = require('iconv-lite');
 const cheerio = require('cheerio');
 const Promise = require('promise');
 const stringSimilarity = require('string-similarity');
-let properties = require('../../resources/properties.json');
+
+const bokusUrl = 'https://www.bokus.com/cgi-bin/product_search.cgi?language=Svenska&rank_order=print_year_month_desc';
 
 const getLatestBook = async function (author) {
-  let url = createUrl(properties.bokusUrl, author, undefined);
+  let url = createUrl(bokusUrl, author, undefined);
   return await getBookFromBokus(url, author, undefined);
 }
 
 const getLatestStatus = async function (author, book) {
-  let url = createUrl(properties.bokusUrl, author, book);
+  let url = createUrl(bokusUrl, author, book);
   return await getBookFromBokus(url, author, book);
 }
 

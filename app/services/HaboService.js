@@ -3,10 +3,10 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 
-const vrydUrl = 'https://vaggeryd.elib.se/Books/FreeTextSearch?searchInput=#####&bookType=e-book';
+const haboUrl = 'https://bibliotek.habokommun.se/web/arena/search?p_p_id=searchResult_WAR_arenaportlet&p_p_lifecycle=1&p_p_state=normal&p_r_p_arena_urn%3Aarena_facet_queries=&p_r_p_arena_urn%3Aarena_search_query=branchId_index%3AASE101003%5C%7C10000%5C%7C10002+AND+mediaClass_index%3AeBook+AND+language_index%3Aswe+AND+#####&p_r_p_arena_urn%3Aarena_search_type=solr&p_r_p_arena_urn%3Aarena_sort_advice=field%3DRelevance%26direction%3DDescending'
 
 const getLibraryBook = async (author, book) => {
-  let url = vrydUrl.replace("#####", book);
+  let url = haboUrl.replace("#####", createQuery(author, book));
 
   const browser = await puppeteer.launch();
   return browser.newPage().then((page) => {
@@ -15,7 +15,7 @@ const getLibraryBook = async (author, book) => {
     });
   }).then((html) => {
     let $ = cheerio.load(html);
-    let resultTitle = $('.product-list-item-link')
+    let resultTitle = $('.arena-record-title')
       .children()
       .first()
       .text()
@@ -24,27 +24,32 @@ const getLibraryBook = async (author, book) => {
       .replace(/:.*/gi, '')
       .trim();
 
-    let resultAuthor = $('.product-list-author')
+    let resultAuthor = $('.arena-record-author')
       .children()
+      .last()
       .text()
       .replace(/[\s]{2,}/gi, '');
+
     resultAuthor = resultAuthor.split('‚');
 
-    let resultLink = $('.product-list-item-link')
+    let resultLink = $('.arena-record-title')
+      .children()
       .first()
       .attr('href');
 
     let status = 'EJ_TILLGANGLIG_FOR_LAN';
-    let store = 'Vaggeryds bibliotek';
+    let link = '';
+    let store = 'Habos bibliotek';
     if (authorMatches(resultAuthor, author) && titleMatches(resultTitle, book)) {
       status = 'TILLGANGLIG_FOR_LAN';
+      link = resultLink;
     }
 
     let libBook = {
       'title': book,
       'status': status,
       'store': store,
-      'link': util.createBookUrl(url, resultLink)
+      'link': link
     }
 
     return libBook;
@@ -54,6 +59,22 @@ const getLibraryBook = async (author, book) => {
     await browser.close();
   });
 
+}
+
+const createQuery = (author, title) => {
+  let authorPart = author.split(' ')
+    .map(part => createPart('author_index', 'contributor_index', part))
+    .join(' AND ').replace(/^/, "(").replace(/$/, ")");
+
+  let titlePart = title.split(' ')
+    .map(part => createPart('title_index', 'titleMain_index', part))
+    .join(' AND ').replace(/^/, "(").replace(/$/, ")");
+
+  return authorPart + ' AND ' + titlePart;
+}
+
+const createPart = (attr1, attr2, part) => {
+  return '(' + attr1 + ':' + part + ' OR ' + attr2 + ':' + part + ')';
 }
 
 const authorMatches = (resultAuthors, author) => {

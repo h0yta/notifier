@@ -2,24 +2,35 @@ const util = require('./ServiceUtil');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
-let properties = require('../../resources/properties.json');
+
+const gbgUrl = 'https://gotlib.overdrive.com/search?query=#####&format=ebook-epub-adobe&sortBy=releasedate';
 
 const getLibraryBook = async (author, book) => {
-  let url = properties.gbgLibraryUrl.replace("#####", util.concatAuthorAndBook(author, book));
+  let url = gbgUrl.replace("#####", util.concatAuthorAndBook(author, book));
 
-  console.log(url)
+  const browser = await puppeteer.launch();
+  return browser.newPage().then((page) => {
+    return page.goto(url).then(() => {
+      return page.content();
+    });
+  }).then((html) => {
+    let $ = cheerio.load(html);
+    let result = $('.title-name')
+      .children()
+      .first()
+      .text()
+      // result may be null here, moves this inside null-check and make a static function.
+      .replace(/\(.*\)/gi, '')
+      .replace(/:.*/gi, '')
+      .trim();
 
-  return puppeteer
-    .launch()
-    .then(function (browser) {
-      return browser.newPage();
-    }).then(function (page) {
-      return page.goto(url).then(function () {
-        return page.content();
-      });
-    }).then(function (html) {
-      let $ = cheerio.load(html);
-      let result = $('.title-name')
+    let link = $('.title-name a')
+      .attr('href');
+
+    let status = 'EJ_TILLGANGLIG_FOR_LAN';
+    let store = 'Göteborgs bibliotek';
+    if (result !== null && stringSimilarity.compareTwoStrings(result, book) >= 0.8) {
+      let gbgStatus = $('.TitleActionButton')
         .children()
         .first()
         .text()
@@ -28,36 +39,22 @@ const getLibraryBook = async (author, book) => {
         .replace(/:.*/gi, '')
         .trim();
 
-      let link = $('.title-name a')
-        .attr('href');
+      status = translateStatus(gbgStatus);
+    }
 
-      let status = 'EJ_TILLGANGLIG_FOR_LAN';
-      let store = 'Göteborgs bibliotek';
-      if (result !== null && stringSimilarity.compareTwoStrings(result, book) >= 0.8) {
-        let gbgStatus = $('.TitleActionButton')
-          .children()
-          .first()
-          .text()
-          // result may be null here, moves this inside null-check and make a static function.
-          .replace(/\(.*\)/gi, '')
-          .replace(/:.*/gi, '')
-          .trim();
+    let libBook = {
+      'title': book,
+      'status': status,
+      'store': store,
+      'link': util.createBookUrl(url, link)
+    }
 
-        status = translateStatus(gbgStatus);
-      }
-
-      let libBook = {
-        'title': book,
-        'status': status,
-        'store': store,
-        'link': util.createBookUrl(url, link)
-      }
-
-      return libBook;
-    }).catch(function (err) {
-      console.log(' Error in getLibraryBook in GbgService', err);
-    });
-
+    return libBook;
+  }).catch(function (err) {
+    console.log(' Error in getLibraryBook in GbgService', err);
+  }).finally(async () => {
+    await browser.close();
+  });
 }
 
 const translateStatus = (status) => {

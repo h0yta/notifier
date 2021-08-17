@@ -3,6 +3,7 @@ const bokusService = require('./services/BokusService');
 const vrydService = require('./services/VrydService');
 const gbgService = require('./services/GbgService');
 const jkpgService = require('./services/JkpgService');
+const haboService = require('./services/HaboService');
 const notificationService = require('./services/NotificationService');
 const dateFormat = require('dateformat');
 const stringSimilarity = require('string-similarity');
@@ -15,12 +16,13 @@ const run = async (authorList) => {
 
     let newBooks = await Promise.all(books.map(async (book) => {
       if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
-        let bokusBook = await bokusService.getLatestStatus(author);
+        let bokusBook = await bokusService.getLatestStatus(author, book);
 
         if (bokusBook.status === 'TILLGANGLIG_FOR_KOP') {
           bokusBook._notify = 'NY_STATUS';
-          return bokusBook;
         }
+
+        return bokusBook;
       } else if (book.status === 'TILLGANGLIG_FOR_KOP') {
         let libraryBook = await vrydService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
@@ -35,6 +37,12 @@ const run = async (authorList) => {
         }
 
         libraryBook = await jkpgService.getLibraryBook(author.name, book.title);
+        if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
+          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
+          return libraryBook;
+        }
+
+        libraryBook = await haboService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
           return libraryBook;
