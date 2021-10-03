@@ -22,7 +22,7 @@ const createUrl = (baseUrl, author, title) => {
 
   if (title != undefined && author.name != undefined) {
     url = url + '&search_word=' + author.name + ' ' + title;
-  } if (title != undefined && author.keyword != undefined) {
+  } else if (title != undefined && author.keyword != undefined) {
     url = url + '&search_word=' + author.keyword + ' ' + title;
   } else if (author.keyword != undefined) {
     url = url + '&search_word=' + author.keyword;
