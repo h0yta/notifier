@@ -16,8 +16,9 @@ const init = async () => {
     .version('0.1.2')
     .option('-a --action <action>', '* Action: Books, Authors, Add')
     .option('-l --list <author list>', '* List: oscar, viggo')
-    .option('-t --title <book title>', '* Title: The best book')
     .option('-n --name <author name>', 'Name: John Doe')
+    .option('-t --title <book title>', '* Title: The best book')
+    .option('-k --keyword <keyword>', '* Keyword: My book series')
     .parse(process.argv);
 
   if (!process.argv.slice(2).length) {
@@ -48,11 +49,10 @@ const init = async () => {
   } else if (stringSimilarity.findBestMatch(program.action, ['add']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');
-    } else if (!program.title) {
-      console.log('Missing -t <book title>');
     }
+
     let list = getAuthorList(program.list);
-    await runService(list, program.name, program.title);
+    await runService(list, program.name, program.title, program.keyword);
   } else {
     console.log(' \'' + program.action + '\' is not a valid action. See --help');
     console.log(' Did you mean \t\'' + matches.bestMatch.target + '\'');
@@ -101,8 +101,8 @@ const runNotifier = async function (authorList, notifierName, title, name) {
   }
 }
 
-const runService = async function (authorList, name, title) {
-  await authorService.run(authorList, name, title);
+const runService = async function (authorList, name, title, keyword) {
+  await authorService.run(authorList, name, title, keyword);
 }
 
 const getAuthorList = (list) => {

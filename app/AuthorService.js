@@ -1,32 +1,33 @@
 const fileService = require('./services/FileService');
+const bokusService = require('./services/BokusService');
 const notificationService = require('./services/NotificationService');
 const dateFormat = require('dateformat');
 const stringSimilarity = require('string-similarity');
 
-const run = async (authorList, name, title) => {
+const run = async (authorList, name, title, keyword) => {
   let authors = await fileService.readAuthors(authorList);
   if (authorExists(authors, name)) {
-    let newAuthors = authors.map(author => {
+    let newAuthors = await Promise.all(authors.map(async author => {
       if (authorMatch(author.name, name)) {
-        let books = addNewIfDontExist(author.books, createBook(title));
+        let book = await createBook(author, title);
+        let books = addNewIfDontExist(author.books, book);
         author.books = books;
         return author;
       }
 
       return author;
-    });
+    }));
     await fileService.writeAuthors(authorList, newAuthors);
     sendNotifications(newAuthors);
   } else {
-    let newAuthor = createAuthor(name);
-    if (title !== undefined) {
-      newAuthor.books.push(createBook(title));
-    }
+    let newAuthor = createAuthor(name, keyword);
+    let book = await createBook(newAuthor, title);
+    newAuthor.books.push(book);
+
     authors.push(newAuthor);
     await fileService.writeAuthors(authorList, authors);
     sendNotifications(authors);
   }
-
 }
 
 const sendNotifications = (authors) => {
@@ -59,19 +60,25 @@ const constructNotification = (author, book) => {
   }
 }
 
-const createAuthor = (name) => {
+const createAuthor = (name, keyword) => {
+  if (keyword !== undefined && keyword !== null) {
+    return {
+      'name': name,
+      'keyword': keyword,
+      'books': []
+    }
+  }
+
   return {
     'name': name,
     'books': []
   }
 }
 
-const createBook = (title) => {
-  return {
-    'title': title,
-    'status': 'KOMMANDE',
-    '_notify': 'NY_BOK'
-  }
+const createBook = async (author, title) => {
+  let bokusBook = await bokusService.getLatestStatus(author, title);
+  bokusBook._notify = 'NY_BOK';
+  return bokusBook;
 }
 
 const addNewIfDontExist = (books, newBook) => {
