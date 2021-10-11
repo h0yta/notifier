@@ -28,9 +28,10 @@ const getLibraryBook = async (author, book) => {
       .children()
       .last()
       .text()
-      .replace(/[\s]{2,}/gi, '');
-
-    resultAuthor = resultAuthor.split('‚');
+      .replace(/[\s]{2,}/gi, '')
+      .replace(/och/g, ',')
+      .split(',')
+      .map(t => t.trim());
 
     let resultLink = $('.arena-record-title')
       .children()
