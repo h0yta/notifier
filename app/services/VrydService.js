@@ -61,7 +61,6 @@ const getLibraryBook = async (author, book) => {
 
 const authorMatches = (resultAuthors, author) => {
   return resultAuthors.filter(a => {
-    console.log('Comparing ', resultAuthors, 'with', author, '=>', stringSimilarity.compareTwoStrings(a, author));
     return stringSimilarity.compareTwoStrings(a, author) >= 0.8;
   }).length > 0;
 }
