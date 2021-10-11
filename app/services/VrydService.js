@@ -26,9 +26,12 @@ const getLibraryBook = async (author, book) => {
 
     let resultAuthor = $('.product-list-author')
       .children()
+      .first()
       .text()
-      .replace(/[\s]{2,}/gi, '');
-    resultAuthor = resultAuthor.split('‚');
+      .replace(/[\s]{2,}/gi, '')
+      .replace(/och/g, ',')
+      .split(',')
+      .map(t => t.trim());
 
     let resultLink = $('.product-list-item-link')
       .first()
@@ -58,6 +61,7 @@ const getLibraryBook = async (author, book) => {
 
 const authorMatches = (resultAuthors, author) => {
   return resultAuthors.filter(a => {
+    console.log('Comparing ', resultAuthors, 'with', author, '=>', stringSimilarity.compareTwoStrings(a, author));
     return stringSimilarity.compareTwoStrings(a, author) >= 0.8;
   }).length > 0;
 }
