@@ -10,11 +10,15 @@ const stringSimilarity = require('string-similarity');
 
 const run = async (authorList) => {
   let authors = await fileService.readAuthors(authorList);
-  let newAuthors = await Promise.all(authors.map(async (author) => {
+  let newAuthors = [];
+  for (let authorIndex = 0; authorIndex < authors.length; authorIndex++) {
+    let author = authors[authorIndex];
     let latestBook = await bokusService.getLatestBook(author);
     let books = addLatestIfDontExist(author.books, latestBook);
 
-    let newBooks = await Promise.all(books.map(async (book) => {
+    let newBooks = [];
+    for (let bookIndex = 0; bookIndex < books.length; bookIndex++) {
+      let book = books[bookIndex];
       if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
         let bokusBook = await bokusService.getLatestStatus(author, book.title);
 
@@ -22,39 +26,44 @@ const run = async (authorList) => {
           bokusBook._notify = 'NY_STATUS';
         }
 
-        return bokusBook;
+        newBooks.push(bokusBook);
+        continue;
       } else if (book.status === 'TILLGANGLIG_FOR_KOP') {
         let libraryBook = await vrydService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          return libraryBook;
+          newBooks.push(libraryBook);
+          continue;
         }
 
         libraryBook = await gbgService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          return libraryBook;
+          newBooks.push(libraryBook);
+          continue;
         }
 
         libraryBook = await jkpgService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          return libraryBook;
+          newBooks.push(libraryBook);
+          continue;
         }
 
         libraryBook = await haboService.getLibraryBook(author.name, book.title);
         if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
           libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          return libraryBook;
+          newBooks.push(libraryBook);
+          continue;
         }
       }
 
-      return book;
-    }));
+      newBooks.push(book);
+    };
 
     author.books = newBooks;
-    return author;
-  }));
+    newAuthors.push(author);
+  };
 
   await fileService.writeAuthors(authorList, newAuthors);
   await sendNotifications(newAuthors);
