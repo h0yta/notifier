@@ -30,7 +30,7 @@ const init = async () => {
   if (stringSimilarity.findBestMatch(program.action, ['authors', 'books', 'bokus']).bestMatch.rating === 1) {
     let list = getAuthorList(program.list);
     await runNotifier(list, program.action, undefined, program.name);
-  } else if (stringSimilarity.findBestMatch(program.action, ['gbg', 'vryd', 'jkpg', 'habo', 'lund ']).bestMatch.rating === 1) {
+  } else if (stringSimilarity.findBestMatch(program.action, ['gbg', 'vryd', 'jkpg', 'habo', 'lund']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');
     } else if (!program.title) {
@@ -54,6 +54,8 @@ const init = async () => {
     let list = getAuthorList(program.list);
     await runService(list, program.name, program.title, program.keyword);
   } else {
+    let matches = stringSimilarity.findBestMatch(program.action,
+      ['authors', 'books', 'bokus', 'gbg', 'vryd', 'jkpg', 'habo', 'lund', 'lib', 'add']);
     console.log(' \'' + program.action + '\' is not a valid action. See --help');
     console.log(' Did you mean \t\'' + matches.bestMatch.target + '\'');
     exitCode = 1;

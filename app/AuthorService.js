@@ -21,8 +21,10 @@ const run = async (authorList, name, title, keyword) => {
     sendNotifications(newAuthors);
   } else {
     let newAuthor = createAuthor(name, keyword);
-    let book = await createBook(newAuthor, title);
-    newAuthor.books.push(book);
+    if (title !== undefined && title !== null) {
+      let book = await createBook(newAuthor, title);
+      newAuthor.books.push(book);
+    }
 
     authors.push(newAuthor);
     await fileService.writeAuthors(authorList, authors);
