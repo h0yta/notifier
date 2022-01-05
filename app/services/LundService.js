@@ -1,5 +1,4 @@
 const util = require('./ServiceUtil');
-const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 
@@ -8,7 +7,7 @@ const lundUrl = 'https://folkbiblioteken.lund.se/search?p_p_id=searchResult_WAR_
 const getLibraryBook = async (author, book) => {
   let url = lundUrl.replace("#####", createQuery(author, book));
 
-  const browser = await puppeteer.launch();
+  const browser = await util.getBrowser();
   return browser.newPage().then((page) => {
     return page.goto(url).then(() => {
       return page.content();
@@ -30,7 +29,6 @@ const getLibraryBook = async (author, book) => {
     let resultLink;
 
     if (resultDetail.includes(author) && resultDetail.includes(book)) {
-      console.log('GOGOGOGO')
       resultTitle = resultDetail.split('/')[0]
         .replace(/\(.*\)/gi, '')
         .replace(/:.*/gi, '')

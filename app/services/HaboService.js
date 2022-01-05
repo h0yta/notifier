@@ -1,5 +1,4 @@
 const util = require('./ServiceUtil');
-const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 
@@ -8,7 +7,7 @@ const haboUrl = 'https://bibliotek.habokommun.se/web/arena/search?p_p_id=searchR
 const getLibraryBook = async (author, book) => {
   let url = haboUrl.replace("#####", createQuery(author, book));
 
-  const browser = await puppeteer.launch();
+  const browser = await util.getBrowser();
   return browser.newPage().then((page) => {
     return page.goto(url).then(() => {
       return page.content();

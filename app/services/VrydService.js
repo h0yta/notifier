@@ -1,5 +1,4 @@
 const util = require('./ServiceUtil');
-const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const stringSimilarity = require('string-similarity');
 
@@ -8,11 +7,7 @@ const vrydUrl = 'https://vaggeryd.elib.se/Books/FreeTextSearch?searchInput=#####
 const getLibraryBook = async (author, book) => {
   let url = vrydUrl.replace("#####", book);
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    executablePath: '/usr/bin/chromium-browser',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
+  const browser = await util.getBrowser();
   return browser.newPage().then((page) => {
     return page.goto(url).then(() => {
       return page.content();

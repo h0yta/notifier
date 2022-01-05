@@ -3,5 +3,6 @@
     "default": "./resources/authors.json",
     "example": "./resources/someOther.json",
   },
-  "skipSlack": true
+  "skipSlack": true,
+  "raspberryPi": false
 }
