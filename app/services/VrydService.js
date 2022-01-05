@@ -8,7 +8,11 @@ const vrydUrl = 'https://vaggeryd.elib.se/Books/FreeTextSearch?searchInput=#####
 const getLibraryBook = async (author, book) => {
   let url = vrydUrl.replace("#####", book);
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: '/usr/bin/chromium-browser',
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+  });
   return browser.newPage().then((page) => {
     return page.goto(url).then(() => {
       return page.content();
