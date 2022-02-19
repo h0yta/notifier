@@ -5,15 +5,16 @@ const cheerio = require('cheerio');
 const Promise = require('promise');
 const stringSimilarity = require('string-similarity');
 
-const bokusUrl = 'https://www.bokus.com/cgi-bin/product_search.cgi?language=Svenska&rank_order=print_year_month_desc';
+const bokusUrlWithLang = 'https://www.bokus.com/cgi-bin/product_search.cgi?language=Svenska&rank_order=print_year_month_desc';
+const bokusUrlWithoutLang = 'https://www.bokus.com/cgi-bin/product_search.cgi?rank_order=print_year_month_desc';
 
 const getLatestBook = async function (author) {
-  let url = createUrl(bokusUrl, author, undefined);
+  let url = createUrl(bokusUrlWithLang, author, undefined);
   return await getBookFromBokus(url, author, undefined);
 }
 
 const getLatestStatus = async function (author, title) {
-  let url = createUrl(bokusUrl, author, title);
+  let url = createUrl(bokusUrlWithoutLang, author, title);
   return await getBookFromBokus(url, author, title);
 }
 
@@ -21,16 +22,23 @@ const createUrl = (baseUrl, author, title) => {
   let url = baseUrl;
 
   if (title != undefined && author.name != undefined) {
-    url = url + '&search_word=' + author.name + ' ' + title;
+    url = url + '&search_word=' + encodeToWin(author.name) + ' ' + encodeToWin(title);
   } else if (title != undefined && author.keyword != undefined) {
-    url = url + '&search_word=' + author.keyword + ' ' + title;
+    url = url + '&search_word=' + encodeToWin(author.keyword) + ' ' + encodeToWin(title);
   } else if (author.keyword != undefined) {
-    url = url + '&search_word=' + author.keyword;
+    url = url + '&search_word=' + encodeToWin(author.keyword);
   } else if (author.name != undefined) {
-    url = url + '&authors=' + author.name;
+    url = url + '&authors=' + encodeToWin(author.name);
   }
 
   return url;
+}
+
+const encodeToWin = (text) => {
+  return text.toLowerCase()
+    .replace(/å/g, '%E5')
+    .replace(/ä/g, '%E4')
+    .replace(/ö/g, '%F6');
 }
 
 const getBookFromBokus = async function (url, author, title) {

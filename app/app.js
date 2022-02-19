@@ -15,7 +15,7 @@ const init = async () => {
   program
     .version('0.1.2')
     .option('-a --action <action>', '* Action: Books, Authors, Add')
-    .option('-l --list <author list>', '* List: oscar, viggo')
+    .option('-l --list <author list>', '* List: oscar, kids')
     .option('-n --name <author name>', 'Name: John Doe')
     .option('-t --title <book title>', '* Title: The best book')
     .option('-k --keyword <keyword>', '* Keyword: My book series')
