@@ -44,8 +44,8 @@ const getLibraryBook = async (author, book) => {
     let libBook = {
       'title': book,
       'status': status,
-      'store': store,
-      'link': util.createBookUrl(url, link)
+      '_store': store,
+      'libraryUrl': util.createBookUrl(url, link)
     }
 
     return libBook;

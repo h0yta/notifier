@@ -48,8 +48,8 @@ const getLibraryBook = async (author, book) => {
     let libBook = {
       'title': book,
       'status': status,
-      'store': store,
-      'link': link
+      '_store': store,
+      'libraryUrl': link
     }
 
     return libBook;

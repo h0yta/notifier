@@ -7,15 +7,33 @@ const stringSimilarity = require('string-similarity');
 
 const bokusUrlWithLang = 'https://www.bokus.com/cgi-bin/product_search.cgi?language=Svenska&rank_order=print_year_month_desc';
 const bokusUrlWithoutLang = 'https://www.bokus.com/cgi-bin/product_search.cgi?rank_order=print_year_month_desc';
+const bokusEbookWithLang = "https://www.bokus.com/cgi-bin/product_search.cgi?rank_order=print_year_month_desc&language=Svenska&binding_normalized=ebok"
 
-const getLatestBook = async function (author) {
+const getLatestBook = async (author) => {
   let url = createUrl(bokusUrlWithLang, author, undefined);
-  return await getBookFromBokus(url, author, undefined);
+  let book = await getBookFromBokus(url, author, undefined);
+  let ebook = await getEbook(author, book.title);
+
+  return mergeBooks(book, ebook);
 }
 
-const getLatestStatus = async function (author, title) {
+const getLatestStatus = async (author, title) => {
   let url = createUrl(bokusUrlWithoutLang, author, title);
-  return await getBookFromBokus(url, author, title);
+  let book = await getBookFromBokus(url, author, title);
+  let ebook = await getEbook(author, title);
+
+  return mergeBooks(book, ebook);
+}
+
+const getEbook = async (author, title) => {
+  let url = createUrl(bokusEbookWithLang, author, undefined);
+  let ebook = await getEBookFromBokus(url, author, undefined);
+
+  if (titleMatch(title, ebook.title)) {
+    return ebook;
+  }
+
+  return undefined;
 }
 
 const createUrl = (baseUrl, author, title) => {
@@ -75,7 +93,7 @@ const getBookFromBokus = async function (url, author, title) {
           let foundFormat = $(elm).find($('.Item__format'))
             .text();
 
-          if (matchesAny(foundAuthors, author.name) && matchesFormats(foundFormat)) {
+          if (matchesAny(foundAuthors, author.name) && matchesPaperBook(foundFormat)) {
             let foundTitle = $(elm).find($('.Item__title--large'))
               .text()
               .replace(/\(.*\)/gi, '')
@@ -97,13 +115,87 @@ const getBookFromBokus = async function (url, author, title) {
             book = {
               'title': translateTitle(foundTitle, author),
               'status': translateStatus(status),
-              'store': 'Bokus',
-              'link': util.createBookUrl(url, link),
-              'release': parseDate(releaseDate)
+              '_store': 'Bokus',
+              'bokusUrl': util.createBookUrl(url, link),
+              'bokusRelease': parseDate(releaseDate)
             }
 
             return false;
-          };
+          }
+        });
+
+        resolve(book);
+        return;
+
+      }
+    });
+  });
+}
+
+const getEBookFromBokus = async function (url, author, title) {
+  return new Promise(function (resolve, reject) {
+    request({
+      'url': url,
+      'encoding': null
+    }, function (err, response, body) {
+      if (err) {
+        console.log(' Error in getLatestBookBokus', err);
+        reject(err);
+      } else {
+        let book = {
+          'title': title,
+          'store': 'Bokus'
+        };
+
+        iconv.skipDecodeWarning = true;
+        let decodedBody = iconv.decode(body, 'windows-1252');
+
+        let $ = cheerio.load(decodedBody);
+        $('.ProductList__item').each((i, elm) => {
+
+          let foundAuthors = $(elm).find($('.ProductList__authors'))
+            .text()
+            .replace(/\(.*\)/gi, '')
+            .replace(/:.*/gi, '')
+            .replace("av", "")
+            .trim()
+            .split(' Och ')
+            .join(',')
+            .split(',');
+
+          let foundFormat = $(elm).find($('.Item__format'))
+            .text();
+
+          if (matchesAny(foundAuthors, author.name) && matchesEBook(foundFormat)) {
+            let foundTitle = $(elm).find($('.Item__title--large'))
+              .text()
+              .replace(/\(.*\)/gi, '')
+              .replace(/:/gi, '')
+              .replace(/-/gi, '')
+              .replace(/Ebok/gi, '')
+              .trim();
+
+            let link = $(elm).find($('.Item__title--large a'))
+              .attr('href');
+
+            let status = $(elm).find($('.ProductList__status'))
+              .text()
+              .trim();
+
+            let releaseDate = $(elm).find($('.Item__edition'))
+              .text()
+              .trim();
+
+            book = {
+              'title': translateTitle(foundTitle, author),
+              'status': translateStatus(status),
+              '_store': 'Bokus',
+              'bokusEbookUrl': util.createBookUrl(url, link),
+              'bokusEbookRelease': parseDate(releaseDate)
+            }
+
+            return false;
+          }
         });
 
         resolve(book);
@@ -118,8 +210,12 @@ const matchesAny = (authorArray, authorName) => {
   return authorArray.filter(a => stringSimilarity.compareTwoStrings(authorName, a) >= 0.8).length > 0;
 }
 
-const matchesFormats = (format) => {
+const matchesPaperBook = (format) => {
   return format.toUpperCase() === 'INBUNDEN' || format.toUpperCase() === 'KARTONNAGE';
+}
+
+const matchesEBook = (format) => {
+  return format.toUpperCase() === 'E-BOK';
 }
 
 const translateTitle = (title, author) => {
@@ -156,6 +252,28 @@ const translateStatus = (status) => {
   } else {
     return 'TILLGANGLIG_FOR_KOP';
   }
+}
+
+
+const titleMatch = (storedBook, latestBook) => {
+  if (storedBook == undefined || latestBook == undefined) {
+    return false;
+  }
+
+  let sim = stringSimilarity.compareTwoStrings(storedBook, latestBook);
+  if (sim > 0.9) {
+    return true;
+  }
+
+  let sl = storedBook.trim().indexOf(latestBook.trim());
+  let ls = latestBook.trim().indexOf(storedBook.trim());
+  return (sl === 0 || ls === 0) && sim > 0.5;
+}
+
+const mergeBooks = (book, ebook) => {
+  book.bokusEbookUrl = ebook !== undefined ? ebook.bokusEbookUrl : undefined;
+  book.bokusEbookRelease = ebook !== undefined ? ebook.bokusEbookRelease : undefined;
+  return book;
 }
 
 module.exports.getLatestBook = getLatestBook;

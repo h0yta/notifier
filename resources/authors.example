@@ -1,24 +1,135 @@
-[
-  {
-    "name": "Hans Rosenfeldt",
-    "books": [
-      {
-        "title": "En högre rättvisa",
-        "status": "TILLGANGLIG_FOR_LAN",
-        "store": "Jönköping bibliotek",
-        "link": "https://bibliotek.jonkoping.se/work/en-h%C3%B6gre-r%C3%A4ttvisa?id=ed52f023-7862-d7cb-a2ac-640ade796390&mediaTypeId=9bccd1a4-6323-4d0b-a8ce-a5d10108805b&queryId=1d707aba-91a5-4a51-acc6-ac625f897fe1&resultIndex=0"
-      }
-    ]
-  },
-  {
-    "name": "Rolf Börjlind",
-    "books": [
-      {
-        "title": "Fruset guld",
-        "status": "KOMMANDE",
-        "store": "Bokus",
-        "link": "https://www.bokus.com/bok/9789113098678/fruset-guld/"
-      }
-    ]
-  }
-]
+{
+  "authors": [
+    {
+      "name": "Arne Dahl",
+      "books": [
+        {
+          "title": "Mord och ingen julefrid",
+          "status": "TILLGANGLIG_FOR_KOP",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789155269517/mord-och-ingen-julefrid/",
+          "release": "2021-09-30"
+        }
+      ]
+    },
+    {
+      "name": "Rolf Börjlind",
+      "books": [
+        {
+          "title": "Den barmhärtige samariten",
+          "status": "TILLGANGLIG_FOR_LAN",
+          "store": "Vaggeryds bibliotek",
+          "link": "https://vaggeryd.elib.se/Books/Details/1144697"
+        },
+        {
+          "title": "Den häpnadsväckande historien om Georg von Ingenting",
+          "status": "KOMMANDE",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789113126432/den-hapnadsvackande-historien-om-georg-von-ingenting/",
+          "release": "2022-09-29"
+        }
+      ]
+    },
+    {
+      "name": "Håkan Nesser",
+      "books": [
+        {
+          "title": "En främling knackar på din dörr  och två andra brottstycken från Maardam med omnejd",
+          "status": "KOMMANDE",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789100197414/en-framling-knackar-pa-din-dorr-och-tva-andra-brottstycken-fran-maardam-med-omnejd/",
+          "release": "2022-06-15"
+        }
+      ]
+    },
+    {
+      "name": "Martin Österdahl",
+      "books": [
+        {
+          "title": "Parmiddagen",
+          "status": "TILLGANGLIG_FOR_KOP",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789189393226/parmiddagen/",
+          "release": "2022-03-17"
+        }
+      ]
+    },
+    {
+      "name": "Åke Edwardson",
+      "books": [
+        {
+          "title": "Mord och ingen julefrid",
+          "status": "TILLGANGLIG_FOR_KOP",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789155269517/mord-och-ingen-julefrid/",
+          "release": "2021-09-30"
+        }
+      ]
+    },
+    {
+      "name": "Hans Rosenfeldt",
+      "books": [
+        {
+          "title": "Som man sår",
+          "status": "TILLGANGLIG_FOR_LAN",
+          "store": "Vaggeryds bibliotek",
+          "link": "https://vaggeryd.elib.se/Books/Details/1138632"
+        }
+      ]
+    },
+    {
+      "name": "Peter May",
+      "books": [
+        {
+          "title": "Stjärnkocken",
+          "status": "KOMMANDE",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789180237277/stjarnkocken/",
+          "release": "2022-08-18"
+        }
+      ]
+    },
+    {
+      "name": "Peter Robinson",
+      "books": [
+        {
+          "title": "Innan mörkret faller",
+          "status": "TILLGANGLIG_FOR_LAN",
+          "store": "Göteborgs bibliotek",
+          "link": "https://gotlib.overdrive.com/media/5923927"
+        },
+        {
+          "title": "Ett nödvändigt slut",
+          "status": "TILLGANGLIG_FOR_KOP",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789137157085/ett-nodvandigt-slut/",
+          "release": "2022-04-13"
+        }
+      ]
+    },
+    {
+      "name": "Måns Nilsson",
+      "books": [
+        {
+          "title": "Ett fynd att dö för",
+          "status": "KOMMANDE",
+          "store": "Bokus",
+          "link": "https://www.bokus.com/bok/9789137159737/ett-fynd-att-do-for/",
+          "release": "2022-05-27"
+        }
+      ]
+    },
+    {
+      "name": "Richard Osman",
+      "books": [
+        {
+          "title": "Mannen som dog två gånger",
+          "status": "TILLGANGLIG_FOR_LAN",
+          "store": "Vaggeryds bibliotek",
+          "link": "https://vaggeryd.elib.se/Books/Details/1139091"
+        }
+      ]
+    }
+  ],
+  "updated": "2022-04-21T10:01:37.930Z"
+}

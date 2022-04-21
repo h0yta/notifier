@@ -21,7 +21,6 @@ const run = async (authorList) => {
       let book = books[bookIndex];
       if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
         let bokusBook = await bokusService.getLatestStatus(author, book.title);
-
         if (bokusBook.status === 'TILLGANGLIG_FOR_KOP') {
           bokusBook._notify = 'NY_STATUS';
         }
@@ -29,33 +28,9 @@ const run = async (authorList) => {
         newBooks.push(bokusBook);
         continue;
       } else if (book.status === 'TILLGANGLIG_FOR_KOP') {
-        let libraryBook = await vrydService.getLibraryBook(author.name, book.title);
-        if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
-          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          newBooks.push(libraryBook);
-          continue;
-        }
-
-        libraryBook = await gbgService.getLibraryBook(author.name, book.title);
-        if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
-          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          newBooks.push(libraryBook);
-          continue;
-        }
-
-        libraryBook = await jkpgService.getLibraryBook(author.name, book.title);
-        if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
-          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          newBooks.push(libraryBook);
-          continue;
-        }
-
-        libraryBook = await haboService.getLibraryBook(author.name, book.title);
-        if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
-          libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
-          newBooks.push(libraryBook);
-          continue;
-        }
+        let libraryBook = await findLibraryBook(author, book);
+        newBooks.push(mergeBooks(book, libraryBook));
+        continue;
       }
 
       newBooks.push(book);
@@ -69,6 +44,42 @@ const run = async (authorList) => {
   await sendNotifications(newAuthors);
 }
 
+const findLibraryBook = async (author, book) => {
+  let libraryBook = await vrydService.getLibraryBook(author.name, book.title);
+  if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
+    libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
+    return libraryBook;
+  }
+
+  libraryBook = await gbgService.getLibraryBook(author.name, book.title);
+  if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
+    libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
+    return libraryBook;
+  }
+
+  libraryBook = await jkpgService.getLibraryBook(author.name, book.title);
+  if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
+    libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
+    return libraryBook;
+  }
+
+  libraryBook = await haboService.getLibraryBook(author.name, book.title);
+  if (libraryBook.status === 'TILLGANGLIG_FOR_LAN') {
+    libraryBook._notify = 'TILLGANGLIG_FOR_LAN';
+    return libraryBook;
+  }
+
+  return book;
+}
+
+const mergeBooks = (book, libraryBook) => {
+  libraryBook.bokusUrl = book.bokusUrl;
+  libraryBook.bokusRelease = book.bokusRelease;
+  libraryBook.bokusEbookUrl = book.bokusEbookUrl;
+  libraryBook.bokusEbookRelease = book.bokusEbookRelease;
+  return libraryBook;
+}
+
 const addLatestIfDontExist = (books, latestBook) => {
   let latestExists = false;
   let newBooks = books.map(book => {
@@ -77,8 +88,9 @@ const addLatestIfDontExist = (books, latestBook) => {
 
       if (statusExceed(book.status, latestBook.status)) {
         latestBook._notify = 'NY_STATUS';
-        return latestBook;
       }
+
+      return latestBook;
     }
 
     return book;
@@ -140,7 +152,7 @@ const constructNotification = (author, book) => {
   } else if (book._notify === 'NY_STATUS') {
     message = 'Ny status för ' + book.title + ' av ' + author.name + ' (' + translateStatus(book.status) + ')';
   } else if (book._notify === 'TILLGANGLIG_FOR_LAN') {
-    message = book.title + ' av ' + author.name + ' är nu tillgänglig för lån på ' + book.store;
+    message = book.title + ' av ' + author.name + ' är nu tillgänglig för lån på ' + book._store;
   }
 
   if (book.link) {
