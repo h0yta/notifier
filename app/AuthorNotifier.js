@@ -13,8 +13,8 @@ const run = async (authorList) => {
   let newAuthors = [];
   for (let authorIndex = 0; authorIndex < authors.length; authorIndex++) {
     let author = authors[authorIndex];
-    let latestBook = await bokusService.getLatestBook(author);
-    let books = addLatestIfDontExist(author.books, latestBook);
+    let latestBokusBook = await bokusService.getLatestBook(author);
+    let books = addLatestIfDontExist(author.books, latestBokusBook);
 
     let newBooks = [];
     for (let bookIndex = 0; bookIndex < books.length; bookIndex++) {
@@ -80,38 +80,37 @@ const mergeBooks = (book, libraryBook) => {
   return libraryBook;
 }
 
-const addLatestIfDontExist = (books, latestBook) => {
+const addLatestIfDontExist = (books, latestBokusBook) => {
   let latestExists = false;
   let newBooks = books.map(book => {
-    if (latestBook.title && titleMatch(book.title, latestBook.title)) {
+    if (latestBokusBook.title && titleMatch(book.title, latestBokusBook.title)) {
       latestExists = true;
 
-      if (statusExceed(book.status, latestBook.status)) {
-        latestBook._notify = 'NY_STATUS';
+      if (statusExceed(book.status, latestBokusBook.status)) {
+        latestBokusBook._notify = 'NY_STATUS';
+        return latestBokusBook;
       }
-
-      return latestBook;
     }
 
-    return book;
+    return mergeBooks(latestBokusBook, book);
   });
 
-  if (latestBook.title && !latestExists) {
-    latestBook._notify = 'NY_BOK';
-    newBooks.push(latestBook);
+  if (latestBokusBook.title && !latestExists) {
+    latestBokusBook._notify = 'NY_BOK';
+    newBooks.push(latestBokusBook);
   }
 
   return newBooks;
 }
 
-const titleMatch = (storedBook, latestBook) => {
-  let sim = stringSimilarity.compareTwoStrings(storedBook, latestBook);
+const titleMatch = (storedBook, latestBokusBook) => {
+  let sim = stringSimilarity.compareTwoStrings(storedBook, latestBokusBook);
   if (sim > 0.9) {
     return true;
   }
 
-  let sl = storedBook.trim().indexOf(latestBook.trim());
-  let ls = latestBook.trim().indexOf(storedBook.trim());
+  let sl = storedBook.trim().indexOf(latestBokusBook.trim());
+  let ls = latestBokusBook.trim().indexOf(storedBook.trim());
   return (sl === 0 || ls === 0) && sim > 0.5;
 }
 
