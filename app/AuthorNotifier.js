@@ -19,15 +19,17 @@ const run = async (authorList) => {
     let newBooks = [];
     for (let bookIndex = 0; bookIndex < books.length; bookIndex++) {
       let book = books[bookIndex];
-      if (book.status === 'KOMMANDE' && book._notify != 'NY_BOK') {
+      if (book.bokusEbookUrl === undefined && book._notify != 'NY_BOK') {
         let bokusBook = await bokusService.getLatestStatus(author, book.title);
-        if (bokusBook.status === 'TILLGANGLIG_FOR_KOP') {
+        if (book.status !== bokusBook.status) {
           bokusBook._notify = 'NY_STATUS';
         }
 
         newBooks.push(bokusBook);
         continue;
-      } else if (book.status === 'TILLGANGLIG_FOR_KOP') {
+      }
+
+      if (book.status === 'TILLGANGLIG_FOR_KOP') {
         let libraryBook = await findLibraryBook(author, book);
         newBooks.push(mergeBooks(book, libraryBook));
         continue;
@@ -90,9 +92,11 @@ const addLatestIfDontExist = (books, latestBokusBook) => {
         latestBokusBook._notify = 'NY_STATUS';
         return latestBokusBook;
       }
+
+      return latestBokusBook;
     }
 
-    return mergeBooks(latestBokusBook, book);
+    return book;
   });
 
   if (latestBokusBook.title && !latestExists) {
