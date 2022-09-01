@@ -28,7 +28,7 @@ const getLibraryBook = async (author, book) => {
 
     let status = 'EJ_TILLGANGLIG_FOR_LAN';
     let store = 'Jönköping bibliotek';
-    if (result !== null && stringSimilarity.compareTwoStrings(result, book) >= 0.8) {
+    if (result !== null && titlesMatch(result, book)) {
       status = 'TILLGANGLIG_FOR_LAN';
     }
 
@@ -45,7 +45,21 @@ const getLibraryBook = async (author, book) => {
   }).finally(async () => {
     await browser.close();
   });
+}
 
+const titlesMatch = (searchedTitle, foundTitle) => {
+  if (searchedTitle == undefined || foundTitle == undefined) {
+    return false;
+  }
+
+  let sim = stringSimilarity.compareTwoStrings(searchedTitle, foundTitle);
+  if (sim > 0.85) {
+    return true;
+  }
+
+  let sl = searchedTitle.trim().indexOf(foundTitle.trim());
+  let ls = foundTitle.trim().indexOf(searchedTitle.trim());
+  return (sl === 0 || ls === 0) && sim > 0.5;
 }
 
 module.exports.getLibraryBook = getLibraryBook;

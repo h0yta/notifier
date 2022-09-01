@@ -40,7 +40,7 @@ const getLibraryBook = async (author, book) => {
     let status = 'EJ_TILLGANGLIG_FOR_LAN';
     let link = '';
     let store = 'Habos bibliotek';
-    if (authorMatches(resultAuthor, author) && titleMatches(resultTitle, book)) {
+    if (authorMatches(resultAuthor, author) && titlesMatch(resultTitle, book)) {
       status = 'TILLGANGLIG_FOR_LAN';
       link = resultLink;
     }
@@ -83,8 +83,19 @@ const authorMatches = (resultAuthors, author) => {
   }).length > 0;
 }
 
-const titleMatches = (resultTitle, book) => {
-  return resultTitle !== null && stringSimilarity.compareTwoStrings(resultTitle, book) >= 0.8;
+const titlesMatch = (searchedTitle, foundTitle) => {
+  if (searchedTitle == undefined || foundTitle == undefined) {
+    return false;
+  }
+
+  let sim = stringSimilarity.compareTwoStrings(searchedTitle, foundTitle);
+  if (sim > 0.85) {
+    return true;
+  }
+
+  let sl = searchedTitle.trim().indexOf(foundTitle.trim());
+  let ls = foundTitle.trim().indexOf(searchedTitle.trim());
+  return (sl === 0 || ls === 0) && sim > 0.5;
 }
 
 module.exports.getLibraryBook = getLibraryBook;

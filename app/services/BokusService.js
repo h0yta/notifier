@@ -29,7 +29,7 @@ const getEbook = async (author, title) => {
   let url = createUrl(bokusEbookWithLang, author, undefined);
   let ebook = await getEBookFromBokus(url, author, undefined);
 
-  if (titleMatch(title, ebook.title)) {
+  if (titlesMatch(title, ebook.title)) {
     return ebook;
   }
 
@@ -255,7 +255,7 @@ const translateStatus = (status) => {
 }
 
 
-const titleMatch = (storedBook, latestBook) => {
+const titlesMatch = (storedBook, latestBook) => {
   if (storedBook == undefined || latestBook == undefined) {
     return false;
   }
