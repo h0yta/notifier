@@ -4,5 +4,6 @@
     "example": "./resources/someOther.json",
   },
   "skipSlack": true,
-  "raspberryPi": false
+  "raspberryPi": false,
+  "maxNumberOfAuthors": 2
 }

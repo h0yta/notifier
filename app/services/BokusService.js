@@ -8,6 +8,7 @@ const stringSimilarity = require('string-similarity');
 const bokusUrlWithLang = 'https://www.bokus.com/cgi-bin/product_search.cgi?language=Svenska&rank_order=print_year_month_desc';
 const bokusUrlWithoutLang = 'https://www.bokus.com/cgi-bin/product_search.cgi?rank_order=print_year_month_desc';
 const bokusEbookWithLang = "https://www.bokus.com/cgi-bin/product_search.cgi?rank_order=print_year_month_desc&language=Svenska&binding_normalized=ebok"
+const properties = require('../../resources/properties.json');
 
 const getLatestBook = async (author) => {
   let url = createUrl(bokusUrlWithLang, author, undefined);
@@ -207,7 +208,8 @@ const getEBookFromBokus = async function (url, author, title) {
 }
 
 const matchesAny = (authorArray, authorName) => {
-  return authorArray.filter(a => stringSimilarity.compareTwoStrings(authorName, a) >= 0.8).length > 0;
+  return authorArray.length <= properties.maxNumberOfAuthors &&
+    authorArray.some(a => stringSimilarity.compareTwoStrings(authorName, a) >= 0.8);
 }
 
 const matchesPaperBook = (format) => {
@@ -242,16 +244,12 @@ function capitalizeFirstLetter(string) {
 }
 
 const translateStatus = (status) => {
-  if (stringSimilarity.compareTwoStrings(status, 'Ännu ej utkommen') > 0.95) {
-    return 'KOMMANDE';
-  } else if (stringSimilarity.compareTwoStrings(status, 'Förväntas skickas under') >= 0.8
-    || stringSimilarity.compareTwoStrings(status, 'Förboka gärna! Förväntad leverans under vecka') >= 0.8) {
-    return 'KOMMANDE';
-  } else if (stringSimilarity.compareTwoStrings(status, 'Tillfälligt slut') > 0.95) {
-    return 'SLUTSALD';
-  } else {
+  if (stringSimilarity.compareTwoStrings(status, 'Skickas inom 1-2 vardagar') > 0.75) {
     return 'TILLGANGLIG_FOR_KOP';
+  } else if (stringSimilarity.compareTwoStrings(status, 'Tillfälligt slut') > 0.75) {
+    return 'SLUTSALD';
   }
+  return 'KOMMANDE';
 }
 
 

@@ -27,10 +27,10 @@ const init = async () => {
   }
 
   let exitCode = 0;
-  if (stringSimilarity.findBestMatch(program.action, ['authors', 'books', 'bokus']).bestMatch.rating === 1) {
+  if (stringSimilarity.findBestMatch(program.action, ['authors', 'books']).bestMatch.rating === 1) {
     let list = getAuthorList(program.list);
     await runNotifier(list, program.action, undefined, program.name);
-  } else if (stringSimilarity.findBestMatch(program.action, ['gbg', 'vryd', 'jkpg', 'habo', 'lund']).bestMatch.rating === 1) {
+  } else if (stringSimilarity.findBestMatch(program.action, ['bokus', 'gbg', 'vryd', 'jkpg', 'habo', 'lund']).bestMatch.rating === 1) {
     if (!program.name) {
       console.log('Missing -n <author name>');
     } else if (!program.title) {
@@ -97,7 +97,13 @@ const runNotifier = async function (authorList, notifierName, title, name) {
       let author = {
         'name': name
       }
-      let bokusBook = await bokus.getLatestBook(author);
+      let bokusBook = {};
+      if (title) {
+        bokusBook = await bokus.getLatestStatus(author, title);
+      } else {
+        bokusBook = await bokus.getLatestBook(author);
+      }
+
       console.log(bokusBook);
       break;
   }
