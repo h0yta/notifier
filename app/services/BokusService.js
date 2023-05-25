@@ -208,11 +208,16 @@ const getEBookFromBokus = async function (url, author, title) {
 }
 
 const matchesAny = (authorArray, authorName) => {
+  let safeAuthorName = authorName.normalize("NFD").replace(/\p{Diacritic}/gu, "");
   return authorArray.length <= properties.maxNumberOfAuthors &&
     authorArray
-      .map(author => author.normalize("NFD").replace(/\p{Diacritic}/gu, ""))
-      .some(a => {
-        return stringSimilarity.compareTwoStrings(authorName, a) >= 0.8
+      .some(author => {
+        if (stringSimilarity.compareTwoStrings(authorName, author) >= 0.8) {
+          return true;
+        }
+
+        let safeAuthor = author.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+        return stringSimilarity.compareTwoStrings(safeAuthorName, safeAuthor) >= 0.8;
       });
 }
 
@@ -276,9 +281,16 @@ const titlesMatch = (storedBook, latestBook) => {
     return true;
   }
 
+  let safeStoredBook = storedBook.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  let safeLatestBook = latestBook.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+  let safeSim = stringSimilarity.compareTwoStrings(safeStoredBook, safeLatestBook);
+  if (safeSim > 0.9) {
+    return true;
+  }
+
   let sl = storedBook.trim().indexOf(latestBook.trim());
   let ls = latestBook.trim().indexOf(storedBook.trim());
-  return (sl === 0 || ls === 0) && sim > 0.5;
+  return (sl === 0 || ls === 0) && (sim > 0.5 || safeSim > 0.5);
 }
 
 const mergeBooks = (book, ebook) => {
