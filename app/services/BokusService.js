@@ -209,7 +209,11 @@ const getEBookFromBokus = async function (url, author, title) {
 
 const matchesAny = (authorArray, authorName) => {
   return authorArray.length <= properties.maxNumberOfAuthors &&
-    authorArray.some(a => stringSimilarity.compareTwoStrings(authorName, a) >= 0.8);
+    authorArray
+      .map(author => author.normalize("NFD").replace(/\p{Diacritic}/gu, ""))
+      .some(a => {
+        return stringSimilarity.compareTwoStrings(authorName, a) >= 0.8
+      });
 }
 
 const matchesPaperBook = (format) => {
@@ -231,11 +235,20 @@ const translateTitle = (title, author) => {
 const parseDate = (dateString) => {
   // 2021-07-26
   let ruleRegexp = /^.*(\d\d\d\d-\d\d-\d\d)/;
-  let match = ruleRegexp.exec(dateString);
-  if (match === null) {
-    console.log('Found no match for', dateString);
+  let result = dateString.split(',').map(ds => {
+    let match = ruleRegexp.exec(ds);
+    if (match === null) {
+      return null;
+    } else {
+      return match[1].trim();
+    }
+  }).filter(ds => ds != null);
+
+  if (result.length === 1) {
+    return result[0];
   } else {
-    return match[1].trim();
+    console.log('Found no match for', dateString);
+    return null;
   }
 }
 
