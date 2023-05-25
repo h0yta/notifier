@@ -91,7 +91,7 @@ const addLatestIfDontExist = (books, latestBokusBook) => {
         return latestBokusBook;
       }
 
-      return mergeBooks(book, latestBokusBook);
+      return mergeBooks(latestBokusBook, book);
     }
 
     return book;
